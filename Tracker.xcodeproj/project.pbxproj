@@ -12,6 +12,8 @@
 		2A9888C72CD93CBE0017C48D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9888C62CD93CBE0017C48D /* ViewController.swift */; };
 		2A9888CC2CD93CBF0017C48D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A9888CB2CD93CBF0017C48D /* Assets.xcassets */; };
 		2A9888CF2CD93CBF0017C48D /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 2A9888CE2CD93CBF0017C48D /* Base */; };
+		2A9888DB2CDA27AB0017C48D /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */; };
+		2A9888DD2CDA27DA0017C48D /* StatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9888DC2CDA27DA0017C48D /* StatViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		2A9888CB2CD93CBF0017C48D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A9888CE2CD93CBF0017C48D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2A9888D02CD93CBF0017C48D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersViewController.swift; sourceTree = "<group>"; };
+		2A9888DC2CDA27DA0017C48D /* StatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +61,8 @@
 				2A9888C22CD93CBE0017C48D /* AppDelegate.swift */,
 				2A9888C42CD93CBE0017C48D /* SceneDelegate.swift */,
 				2A9888C62CD93CBE0017C48D /* ViewController.swift */,
+				2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */,
+				2A9888DC2CDA27DA0017C48D /* StatViewController.swift */,
 				2A9888CB2CD93CBF0017C48D /* Assets.xcassets */,
 				2A9888CD2CD93CBF0017C48D /* LaunchScreen.storyboard */,
 				2A9888D02CD93CBF0017C48D /* Info.plist */,
@@ -135,7 +141,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				2A9888C72CD93CBE0017C48D /* ViewController.swift in Sources */,
+				2A9888DB2CDA27AB0017C48D /* TrackersViewController.swift in Sources */,
 				2A9888C32CD93CBE0017C48D /* AppDelegate.swift in Sources */,
+				2A9888DD2CDA27DA0017C48D /* StatViewController.swift in Sources */,
 				2A9888C52CD93CBE0017C48D /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
