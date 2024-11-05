@@ -7,10 +7,14 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class RootViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        loadMainScreen()
+    }
+    
+    func loadMainScreen(){
         let tabBarController = UITabBarController()
         
         let trackersViewController = TrackersViewController()
@@ -22,9 +26,12 @@ class ViewController: UIViewController {
         statNavController.tabBarItem = UITabBarItem(title: "Статистика", image: UIImage(named: "StatTabIcon.png"), tag: 1)
         
         tabBarController.viewControllers = [trackersNavController, statNavController]
+        
+        addChild(tabBarController)
+        tabBarController.view.frame = view.bounds
         view.addSubview(tabBarController.view)
+        tabBarController.didMove(toParent: self)
     }
-    
     
 }
 
