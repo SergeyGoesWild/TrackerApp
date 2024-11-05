@@ -14,6 +14,11 @@ final class TrackersViewController: UIViewController {
         setupTrackerScreen()
     }
     
+    @objc
+    private func plusButtonPressed() {
+        print("Plus button PRESSED")
+    }
+    
     private func setupTrackerScreen() {
         view.backgroundColor = .white
         
@@ -29,6 +34,7 @@ final class TrackersViewController: UIViewController {
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         plusButton.setImage(UIImage(named: "PlusIcon.png"), for: .normal)
         plusButton.setTitle("", for: .normal)
+        plusButton.addTarget(self, action: #selector(plusButtonPressed), for: .touchUpInside)
         view.addSubview(plusButton)
         
         let starImage = UIImageView()
@@ -45,10 +51,10 @@ final class TrackersViewController: UIViewController {
         view.addSubview(starTextLabel)
         
         NSLayoutConstraint.activate([
-            plusButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
-            plusButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 45),
+            plusButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 6),
+            plusButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 1),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 88),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44),
             starImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             starImage.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             starTextLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),

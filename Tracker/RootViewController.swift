@@ -19,10 +19,12 @@ class RootViewController: UIViewController {
         
         let trackersViewController = TrackersViewController()
         let trackersNavController = UINavigationController(rootViewController: trackersViewController)
+        trackersNavController.isNavigationBarHidden = true
         trackersNavController.tabBarItem = UITabBarItem(title: "Трекеры", image: UIImage(named: "TrackerTabIcon.png"), tag: 0)
         
         let statViewController = StatViewController()
         let statNavController = UINavigationController(rootViewController: statViewController)
+        statNavController.isNavigationBarHidden = true
         statNavController.tabBarItem = UITabBarItem(title: "Статистика", image: UIImage(named: "StatTabIcon.png"), tag: 1)
         
         tabBarController.viewControllers = [trackersNavController, statNavController]
