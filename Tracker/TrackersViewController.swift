@@ -65,6 +65,14 @@ final class TrackersViewController: UIViewController {
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         view.addSubview(datePicker)
         
+        //TODO: проверить поля у этого элемента, они как будто больше
+        let searchBar = UISearchBar()
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBar.placeholder = "Поиск"
+        searchBar.sizeToFit()
+        searchBar.searchBarStyle = .minimal
+        view.addSubview(searchBar)
+        
         let starImage = UIImageView()
         starImage.translatesAutoresizingMaskIntoConstraints = false
         starImage.image = UIImage(named: "StarIcon")
@@ -85,6 +93,9 @@ final class TrackersViewController: UIViewController {
             datePicker.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44),
+            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
+            searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             starImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             starImage.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             starTextLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
