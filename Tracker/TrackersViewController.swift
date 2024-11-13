@@ -9,6 +9,10 @@ import Foundation
 import UIKit
 
 final class TrackersViewController: UIViewController {
+    
+    var categories: [TrackerCategory]?
+    var completedTrackers: [TrackerRecord]?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTrackerScreen()

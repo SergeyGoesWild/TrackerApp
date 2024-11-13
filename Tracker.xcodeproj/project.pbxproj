@@ -14,6 +14,7 @@
 		2A9888CF2CD93CBF0017C48D /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 2A9888CE2CD93CBF0017C48D /* Base */; };
 		2A9888DB2CDA27AB0017C48D /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */; };
 		2A9888DD2CDA27DA0017C48D /* StatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9888DC2CDA27DA0017C48D /* StatViewController.swift */; };
+		2A9F02F62CE36BE800AB58BA /* TrackerStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F02F52CE36BE800AB58BA /* TrackerStructures.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		2A9888D02CD93CBF0017C48D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersViewController.swift; sourceTree = "<group>"; };
 		2A9888DC2CDA27DA0017C48D /* StatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatViewController.swift; sourceTree = "<group>"; };
+		2A9F02F52CE36BE800AB58BA /* TrackerStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerStructures.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 				2A9888C42CD93CBE0017C48D /* SceneDelegate.swift */,
 				2A9888C62CD93CBE0017C48D /* RootViewController.swift */,
 				2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */,
+				2A9F02F52CE36BE800AB58BA /* TrackerStructures.swift */,
 				2A9888DC2CDA27DA0017C48D /* StatViewController.swift */,
 				2A9888CB2CD93CBF0017C48D /* Assets.xcassets */,
 				2A9888CD2CD93CBF0017C48D /* LaunchScreen.storyboard */,
@@ -140,6 +143,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A9F02F62CE36BE800AB58BA /* TrackerStructures.swift in Sources */,
 				2A9888C72CD93CBE0017C48D /* RootViewController.swift in Sources */,
 				2A9888DB2CDA27AB0017C48D /* TrackersViewController.swift in Sources */,
 				2A9888C32CD93CBE0017C48D /* AppDelegate.swift in Sources */,
