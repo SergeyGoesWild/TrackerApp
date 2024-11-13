@@ -13,14 +13,25 @@ final class TrackersViewController: UIViewController {
     var categories: [TrackerCategory]?
     var completedTrackers: [TrackerRecord]?
     
+//    var datePicker: UIDatePicker!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTrackerScreen()
+        
     }
     
     @objc
     private func plusButtonPressed() {
         print("Plus button PRESSED")
+    }
+    
+    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy" // Формат даты
+        let formattedDate = dateFormatter.string(from: selectedDate)
+        print("Выбранная дата: \(formattedDate)")
     }
     
     private func setupTrackerScreen() {
@@ -41,6 +52,19 @@ final class TrackersViewController: UIViewController {
         plusButton.addTarget(self, action: #selector(plusButtonPressed), for: .touchUpInside)
         view.addSubview(plusButton)
         
+        let datePicker = UIDatePicker()
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.datePickerMode = .date
+        let currentDate = Date()
+        let calendar = Calendar.current
+        let minDate = calendar.date(byAdding: .year, value: -10, to: currentDate)
+        let maxDate = calendar.date(byAdding: .year, value: 10, to: currentDate)
+        datePicker.minimumDate = minDate
+        datePicker.maximumDate = maxDate
+        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
+        view.addSubview(datePicker)
+        
         let starImage = UIImageView()
         starImage.translatesAutoresizingMaskIntoConstraints = false
         starImage.image = UIImage(named: "StarIcon")
@@ -57,6 +81,8 @@ final class TrackersViewController: UIViewController {
         NSLayoutConstraint.activate([
             plusButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 6),
             plusButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 1),
+            datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            datePicker.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44),
             starImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
