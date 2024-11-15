@@ -8,17 +8,16 @@
 import Foundation
 import UIKit
 
-final class TrackersViewController: UIViewController {
+final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
     var categories: [TrackerCategory]?
     var completedTrackers: [TrackerRecord]?
     
-//    var datePicker: UIDatePicker!
+    var trackerCollection: UICollectionView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTrackerScreen()
-        
     }
     
     @objc
@@ -34,6 +33,20 @@ final class TrackersViewController: UIViewController {
         print("Выбранная дата: \(formattedDate)")
     }
     
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 3
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
+        return cell!
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+            let cellWidth = (collectionView.bounds.width - 10) / CGFloat(2)
+        return CGSize(width: cellWidth, height: cellWidth * 0.88)
+    }
+    
     private func setupTrackerScreen() {
         view.backgroundColor = .white
         
@@ -47,8 +60,9 @@ final class TrackersViewController: UIViewController {
         
         let plusButton = UIButton()
         plusButton.translatesAutoresizingMaskIntoConstraints = false
-        plusButton.setImage(UIImage(named: "PlusIcon.png"), for: .normal)
+        plusButton.setImage(UIImage(named: "PlusIconSVG"), for: .normal)
         plusButton.setTitle("", for: .normal)
+        plusButton.tintColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
         plusButton.addTarget(self, action: #selector(plusButtonPressed), for: .touchUpInside)
         view.addSubview(plusButton)
         
@@ -65,6 +79,7 @@ final class TrackersViewController: UIViewController {
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         view.addSubview(datePicker)
         
+        //TODO: насторить звезду по середине видимой части
         //TODO: проверить поля у этого элемента, они как будто больше
         let searchBar = UISearchBar()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
@@ -86,9 +101,18 @@ final class TrackersViewController: UIViewController {
         starTextLabel.textAlignment = .center
         view.addSubview(starTextLabel)
         
+        trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        trackerCollection.translatesAutoresizingMaskIntoConstraints = false
+        trackerCollection.register(TrackerCell.self, forCellWithReuseIdentifier: "OneTracker")
+        trackerCollection.dataSource = self
+        trackerCollection.delegate = self
+        view.addSubview(trackerCollection)
+        
         NSLayoutConstraint.activate([
             plusButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 6),
             plusButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 1),
+            plusButton.widthAnchor.constraint(equalToConstant: 42),
+            plusButton.heightAnchor.constraint(equalToConstant: 42),
             datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             datePicker.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -99,7 +123,11 @@ final class TrackersViewController: UIViewController {
             starImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             starImage.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             starTextLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            starTextLabel.topAnchor.constraint(equalTo: starImage.bottomAnchor, constant: 8)
+            starTextLabel.topAnchor.constraint(equalTo: starImage.bottomAnchor, constant: 8),
+            trackerCollection.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            trackerCollection.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            trackerCollection.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 24),
+            trackerCollection.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
     }
 }

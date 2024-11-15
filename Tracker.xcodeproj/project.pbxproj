@@ -15,6 +15,7 @@
 		2A9888DB2CDA27AB0017C48D /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */; };
 		2A9888DD2CDA27DA0017C48D /* StatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9888DC2CDA27DA0017C48D /* StatViewController.swift */; };
 		2A9F02F62CE36BE800AB58BA /* TrackerStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F02F52CE36BE800AB58BA /* TrackerStructures.swift */; };
+		2A9F02F82CE5462F00AB58BA /* TrackerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F02F72CE5462F00AB58BA /* TrackerCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersViewController.swift; sourceTree = "<group>"; };
 		2A9888DC2CDA27DA0017C48D /* StatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatViewController.swift; sourceTree = "<group>"; };
 		2A9F02F52CE36BE800AB58BA /* TrackerStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerStructures.swift; sourceTree = "<group>"; };
+		2A9F02F72CE5462F00AB58BA /* TrackerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +46,7 @@
 		2A9888B62CD93CBE0017C48D = {
 			isa = PBXGroup;
 			children = (
+				2A9F02F72CE5462F00AB58BA /* TrackerCell.swift */,
 				2A9888C12CD93CBE0017C48D /* Tracker */,
 				2A9888C02CD93CBE0017C48D /* Products */,
 			);
@@ -146,6 +149,7 @@
 				2A9F02F62CE36BE800AB58BA /* TrackerStructures.swift in Sources */,
 				2A9888C72CD93CBE0017C48D /* RootViewController.swift in Sources */,
 				2A9888DB2CDA27AB0017C48D /* TrackersViewController.swift in Sources */,
+				2A9F02F82CE5462F00AB58BA /* TrackerCell.swift in Sources */,
 				2A9888C32CD93CBE0017C48D /* AppDelegate.swift in Sources */,
 				2A9888DD2CDA27DA0017C48D /* StatViewController.swift in Sources */,
 				2A9888C52CD93CBE0017C48D /* SceneDelegate.swift in Sources */,
