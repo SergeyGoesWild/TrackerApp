@@ -10,13 +10,20 @@ import UIKit
 
 final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
-    var categories: [TrackerCategory]?
-    var completedTrackers: [TrackerRecord]?
+    var categories: [TrackerCategory] = []
+    var completedTrackers: [TrackerRecord] = []
     
     var trackerCollection: UICollectionView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let tracker1 = Tracker(trackerID: UUID(), trackerName: "Считать звезды", color: UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 1.00), emoji: "✨", schedule: ["Saturday"])
+        let tracker2 = Tracker(trackerID: UUID(), trackerName: "Выглядеть классно", color: UIColor(red: 0.99, green: 0.30, blue: 0.29, alpha: 1.00), emoji: "😎", schedule: ["Tuesday", "Friday"])
+        let tracker3 = Tracker(trackerID: UUID(), trackerName: "Смотреть на закат", color: UIColor(red: 0.47, green: 0.58, blue: 0.96, alpha: 1.00), emoji: "🌇", schedule: ["Monday", "Tuesday", "Sunday"])
+        let category1 = TrackerCategory(categoryTitle: "Очень важно", categoryTrackers: [tracker1])
+        categories.append(category1)
+        let category2 = TrackerCategory(categoryTitle: "Не очень важно", categoryTrackers: [tracker2, tracker3])
+        categories.append(category2)
         setupTrackerScreen()
     }
     
@@ -33,8 +40,12 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         print("Выбранная дата: \(formattedDate)")
     }
     
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return categories.count
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 3
+        return categories[section].categoryTrackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
