@@ -30,6 +30,7 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func setupTrackerView() {
+        contentView.backgroundColor = .purple
         
         coloredBackground = UIView()
         coloredBackground.translatesAutoresizingMaskIntoConstraints = false
@@ -43,10 +44,9 @@ final class TrackerCell: UICollectionViewCell {
         emojiCircle.layer.cornerRadius = CGFloat(12)
         contentView.addSubview(emojiCircle)
         
-        //TODO: емоджи слишком большой
         emojiLabel = UILabel()
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-        emojiLabel.font = UIFont.systemFont(ofSize: 16)
+        emojiLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
         emojiLabel.text = dataModel.emoji
         contentView.addSubview(emojiLabel)
         

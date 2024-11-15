@@ -22,7 +22,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         let tracker3 = Tracker(trackerID: UUID(), trackerName: "Смотреть на закат", color: UIColor(red: 0.47, green: 0.58, blue: 0.96, alpha: 1.00), emoji: "🌇", schedule: ["Monday", "Tuesday", "Sunday"])
         let category1 = TrackerCategory(categoryTitle: "Очень важно", categoryTrackers: [tracker1])
         categories.append(category1)
-        let category2 = TrackerCategory(categoryTitle: "Не очень важно", categoryTrackers: [tracker2, tracker3])
+        let category2 = TrackerCategory(categoryTitle: "Не очень важно", categoryTrackers: [tracker2, tracker3, tracker3])
         categories.append(category2)
         setupTrackerScreen()
     }
@@ -53,9 +53,36 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         return cell!
     }
     
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as! TrackerHeader
+        
+        //            let label = UILabel(frame: header.bounds)
+        //            label.text = "Section \(indexPath.section + 1)"
+        //            label.textAlignment = .center
+        //            label.textColor = .white
+        
+        return header
+    }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-            let cellWidth = (collectionView.bounds.width - 10) / CGFloat(2)
+        let cellWidth = (collectionView.bounds.width - 7) / CGFloat(2)
         return CGSize(width: cellWidth, height: cellWidth * 0.88)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 18)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 7
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 12, left: 0, bottom: 16, right: 0)
     }
     
     private func setupTrackerScreen() {
@@ -115,8 +142,10 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         trackerCollection.translatesAutoresizingMaskIntoConstraints = false
         trackerCollection.register(TrackerCell.self, forCellWithReuseIdentifier: "OneTracker")
+        trackerCollection.register(TrackerHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "Header")
         trackerCollection.dataSource = self
         trackerCollection.delegate = self
+        trackerCollection.backgroundColor = .orange
         view.addSubview(trackerCollection)
         
         NSLayoutConstraint.activate([

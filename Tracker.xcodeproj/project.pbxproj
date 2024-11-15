@@ -16,6 +16,7 @@
 		2A9888DD2CDA27DA0017C48D /* StatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9888DC2CDA27DA0017C48D /* StatViewController.swift */; };
 		2A9F02F62CE36BE800AB58BA /* TrackerStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F02F52CE36BE800AB58BA /* TrackerStructures.swift */; };
 		2A9F02F82CE5462F00AB58BA /* TrackerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F02F72CE5462F00AB58BA /* TrackerCell.swift */; };
+		2A9F02FA2CE7873C00AB58BA /* TrackerHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F02F92CE7873C00AB58BA /* TrackerHeader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		2A9888DC2CDA27DA0017C48D /* StatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatViewController.swift; sourceTree = "<group>"; };
 		2A9F02F52CE36BE800AB58BA /* TrackerStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerStructures.swift; sourceTree = "<group>"; };
 		2A9F02F72CE5462F00AB58BA /* TrackerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCell.swift; sourceTree = "<group>"; };
+		2A9F02F92CE7873C00AB58BA /* TrackerHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerHeader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				2A9888C22CD93CBE0017C48D /* AppDelegate.swift */,
 				2A9888C42CD93CBE0017C48D /* SceneDelegate.swift */,
 				2A9888C62CD93CBE0017C48D /* RootViewController.swift */,
+				2A9F02F92CE7873C00AB58BA /* TrackerHeader.swift */,
 				2A9888DA2CDA27AB0017C48D /* TrackersViewController.swift */,
 				2A9F02F52CE36BE800AB58BA /* TrackerStructures.swift */,
 				2A9888DC2CDA27DA0017C48D /* StatViewController.swift */,
@@ -149,6 +152,7 @@
 				2A9F02F62CE36BE800AB58BA /* TrackerStructures.swift in Sources */,
 				2A9888C72CD93CBE0017C48D /* RootViewController.swift in Sources */,
 				2A9888DB2CDA27AB0017C48D /* TrackersViewController.swift in Sources */,
+				2A9F02FA2CE7873C00AB58BA /* TrackerHeader.swift in Sources */,
 				2A9F02F82CE5462F00AB58BA /* TrackerCell.swift in Sources */,
 				2A9888C32CD93CBE0017C48D /* AppDelegate.swift in Sources */,
 				2A9888DD2CDA27DA0017C48D /* StatViewController.swift in Sources */,
