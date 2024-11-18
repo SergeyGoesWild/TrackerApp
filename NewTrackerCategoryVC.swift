@@ -9,8 +9,8 @@ import Foundation
 import UIKit
 
 final class NewTrackerCategoryVC: UIViewController {
-    var textLabel: UILabel!
-    var dismissButton: UIButton!
+    var habitButton: UIButton!
+    var eventButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,22 +32,33 @@ final class NewTrackerCategoryVC: UIViewController {
         view.backgroundColor = .white
         navigationItem.title = "Создание трекера"
         
-        textLabel = UILabel()
-        textLabel.text = "First modal screen"
-        textLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(textLabel)
+        habitButton = UIButton(type: .system)
+        habitButton.setTitle("Привычка", for: .normal)
+        habitButton.layer.cornerRadius = 16
+        habitButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
+        habitButton.setTitleColor(.white, for: .normal)
+        habitButton.translatesAutoresizingMaskIntoConstraints = false
+        habitButton.addTarget(self, action: #selector(dismissButtonPressed), for: .touchUpInside)
+        view.addSubview(habitButton)
         
-        dismissButton = UIButton(type: .system)
-        dismissButton.setTitle("Dismiss", for: .normal)
-        dismissButton.translatesAutoresizingMaskIntoConstraints = false
-        dismissButton.addTarget(self, action: #selector(dismissButtonPressed), for: .touchUpInside)
-        view.addSubview(dismissButton)
+        eventButton = UIButton(type: .system)
+        eventButton.setTitle("Нерегулярные событие", for: .normal)
+        eventButton.layer.cornerRadius = 16
+        eventButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
+        eventButton.setTitleColor(.white, for: .normal)
+        eventButton.translatesAutoresizingMaskIntoConstraints = false
+        eventButton.addTarget(self, action: #selector(dismissButtonPressed), for: .touchUpInside)
+        view.addSubview(eventButton)
         
         NSLayoutConstraint.activate([
-            textLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            textLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            dismissButton.topAnchor.constraint(equalTo: textLabel.bottomAnchor),
-            dismissButton.centerXAnchor.constraint(equalTo: textLabel.centerXAnchor),
+            habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            habitButton.heightAnchor.constraint(equalToConstant: 60),
+            habitButton.bottomAnchor.constraint(equalTo: view.centerYAnchor, constant: -8),
+            eventButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            eventButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            eventButton.heightAnchor.constraint(equalToConstant: 60),
+            eventButton.topAnchor.constraint(equalTo: view.centerYAnchor, constant: 8),
         ])
     }
 }
