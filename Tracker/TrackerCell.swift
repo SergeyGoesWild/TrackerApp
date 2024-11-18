@@ -30,7 +30,6 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func setupTrackerView() {
-        contentView.backgroundColor = .purple
         
         coloredBackground = UIView()
         coloredBackground.translatesAutoresizingMaskIntoConstraints = false

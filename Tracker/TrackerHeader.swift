@@ -22,7 +22,6 @@ final class TrackerHeader: UICollectionReusableView {
     }
     
     private func setupHeaderView() {
-        backgroundColor = .green
         headerLabel = UILabel()
         headerLabel.translatesAutoresizingMaskIntoConstraints = false
         headerLabel.text = "Нужные дела"

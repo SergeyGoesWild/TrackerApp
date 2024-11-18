@@ -29,7 +29,9 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
     
     @objc
     private func plusButtonPressed() {
-        print("Plus button PRESSED")
+        let modalVC = NewTrackerCategoryVC()
+        let navController = UINavigationController(rootViewController: modalVC)
+        present(navController, animated: true)
     }
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
@@ -145,7 +147,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         trackerCollection.register(TrackerHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "Header")
         trackerCollection.dataSource = self
         trackerCollection.delegate = self
-        trackerCollection.backgroundColor = .orange
         view.addSubview(trackerCollection)
         
         NSLayoutConstraint.activate([
