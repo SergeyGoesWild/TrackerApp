@@ -14,21 +14,29 @@ final class NewTrackerCategoryVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupTrackerSpecsView()
+        setupTrackerCategoryView()
     }
     
-    @objc private func dismissButtonPressed() {
+    @objc private func habitButtonPressed() {
         let specsVC = NewTrackerSpecsVC()
         navigationController?.pushViewController(specsVC, animated: true)
+    }
+    
+    @objc private func eventButtonPressed() {
+        let specsVC = NewTrackerSpecsVC()
+        navigationController?.pushViewController(specsVC, animated: true)
+    }
+    
+//    @objc private func dismissButtonPressed() {
 //            guard let presentingVC = self.presentingViewController else { return }
 //            dismiss(animated: true) {
 //            let specsVC = NewTrackerSpecsVC()
 //            let navController = UINavigationController(rootViewController: specsVC)
 //            presentingVC.present(navController, animated: true)
 //        }
-    }
+//    }
     
-    private func setupTrackerSpecsView() {
+    private func setupTrackerCategoryView() {
         view.backgroundColor = .white
         navigationItem.title = "Создание трекера"
         
@@ -38,7 +46,7 @@ final class NewTrackerCategoryVC: UIViewController {
         habitButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
         habitButton.setTitleColor(.white, for: .normal)
         habitButton.translatesAutoresizingMaskIntoConstraints = false
-        habitButton.addTarget(self, action: #selector(dismissButtonPressed), for: .touchUpInside)
+        habitButton.addTarget(self, action: #selector(habitButtonPressed), for: .touchUpInside)
         view.addSubview(habitButton)
         
         eventButton = UIButton(type: .system)
@@ -47,7 +55,7 @@ final class NewTrackerCategoryVC: UIViewController {
         eventButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
         eventButton.setTitleColor(.white, for: .normal)
         eventButton.translatesAutoresizingMaskIntoConstraints = false
-        eventButton.addTarget(self, action: #selector(dismissButtonPressed), for: .touchUpInside)
+        eventButton.addTarget(self, action: #selector(eventButtonPressed), for: .touchUpInside)
         view.addSubview(eventButton)
         
         NSLayoutConstraint.activate([
