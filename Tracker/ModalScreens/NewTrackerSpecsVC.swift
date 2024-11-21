@@ -32,6 +32,7 @@ final class NewTrackerSpecsVC: UIViewController {
                      UIColor(red: 0.18, green: 0.82, blue: 0.35, alpha: 1.00)]
     
     var specsScrollView: UIScrollView!
+    var specsContainer: UIView!
     var titleTextField: UITextField!
     var specsTable: UITableView!
     var emojiCollection: UICollectionView!
@@ -62,6 +63,10 @@ final class NewTrackerSpecsVC: UIViewController {
         specsScrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(specsScrollView)
         
+        specsContainer = UIView()
+        specsContainer.translatesAutoresizingMaskIntoConstraints = false
+        specsScrollView.addSubview(specsContainer)
+        
         titleTextField = UITextField()
         titleTextField.placeholder = "Введите название трекера"
         titleTextField.layer.cornerRadius = 16
@@ -73,7 +78,7 @@ final class NewTrackerSpecsVC: UIViewController {
         titleTextField.leftView = paddingView
         titleTextField.leftViewMode = .always
         titleTextField.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(titleTextField)
+        specsScrollView.addSubview(titleTextField)
         
         specsTable = UITableView(frame: .zero, style: .plain)
         specsTable.dataSource = self
@@ -84,7 +89,7 @@ final class NewTrackerSpecsVC: UIViewController {
         specsTable.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         specsTable.tableFooterView = UIView(frame: .zero)
         //TODO: поправить линии сепараторы
-        view.addSubview(specsTable)
+        specsScrollView.addSubview(specsTable)
         
         emojiCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         emojiCollection.register(EmojiCell.self, forCellWithReuseIdentifier: "emojiCell")
@@ -93,7 +98,7 @@ final class NewTrackerSpecsVC: UIViewController {
         emojiCollection.delegate = self
         emojiCollection.dataSource = self
         emojiCollection.tag = 1
-        view.addSubview(emojiCollection)
+        specsScrollView.addSubview(emojiCollection)
         
         colorCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         colorCollection.register(ColorCell.self, forCellWithReuseIdentifier: "colorCell")
@@ -102,7 +107,7 @@ final class NewTrackerSpecsVC: UIViewController {
         colorCollection.delegate = self
         colorCollection.dataSource = self
         colorCollection.tag = 2
-        view.addSubview(colorCollection)
+        specsScrollView.addSubview(colorCollection)
         
         createButton = UIButton(type: .system)
         createButton.setTitle("Создать", for: .normal)
@@ -111,7 +116,7 @@ final class NewTrackerSpecsVC: UIViewController {
         createButton.setTitleColor(.white, for: .normal)
         createButton.translatesAutoresizingMaskIntoConstraints = false
         createButton.addTarget(self, action: #selector(createButtonPressed), for: .touchUpInside)
-        view.addSubview(createButton)
+        specsScrollView.addSubview(createButton)
         
         cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
@@ -121,7 +126,7 @@ final class NewTrackerSpecsVC: UIViewController {
         cancelButton.setTitleColor(UIColor(red: 0.96, green: 0.42, blue: 0.42, alpha: 1.00), for: .normal)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelButtonPressed), for: .touchUpInside)
-        view.addSubview(cancelButton)
+        specsScrollView.addSubview(cancelButton)
         
         NSLayoutConstraint.activate([
             specsScrollView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -129,35 +134,42 @@ final class NewTrackerSpecsVC: UIViewController {
             specsScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             specsScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             
-            titleTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            titleTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            titleTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            specsContainer.topAnchor.constraint(equalTo: specsScrollView.topAnchor),
+            specsContainer.leadingAnchor.constraint(equalTo: specsScrollView.leadingAnchor),
+            specsContainer.trailingAnchor.constraint(equalTo: specsScrollView.trailingAnchor),
+            specsContainer.bottomAnchor.constraint(equalTo: specsScrollView.bottomAnchor),
+            specsContainer.widthAnchor.constraint(equalTo: specsScrollView.widthAnchor),
+            specsContainer.heightAnchor.constraint(greaterThanOrEqualTo: specsScrollView.heightAnchor),
+            
+            titleTextField.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 16),
+            titleTextField.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -16),
+            titleTextField.topAnchor.constraint(equalTo: specsContainer.safeAreaLayoutGuide.topAnchor, constant: 24),
             titleTextField.heightAnchor.constraint(equalToConstant: 75),
             
-            specsTable.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            specsTable.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            specsTable.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 16),
+            specsTable.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -16),
             specsTable.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 24),
             specsTable.heightAnchor.constraint(equalToConstant: 150),
             
-            emojiCollection.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            emojiCollection.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            emojiCollection.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 18),
+            emojiCollection.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -18),
             emojiCollection.topAnchor.constraint(equalTo: specsTable.bottomAnchor, constant: 32),
             //TODO: внизу какой-то странный отступ, нужно поправить
             emojiCollection.heightAnchor.constraint(equalToConstant: 204),
             
-            colorCollection.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
-            colorCollection.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            colorCollection.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 18),
+            colorCollection.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -18),
             colorCollection.topAnchor.constraint(equalTo: emojiCollection.bottomAnchor, constant: 16),
             //TODO: внизу какой-то странный отступ, нужно поправить
             colorCollection.heightAnchor.constraint(equalToConstant: 204),
             
-            createButton.leadingAnchor.constraint(equalTo: view.centerXAnchor, constant: 4),
-            createButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            createButton.leadingAnchor.constraint(equalTo: specsContainer.centerXAnchor, constant: 4),
+            createButton.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -20),
             createButton.heightAnchor.constraint(equalToConstant: 60),
             createButton.topAnchor.constraint(equalTo: colorCollection.bottomAnchor),
             
-            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            cancelButton.trailingAnchor.constraint(equalTo: view.centerXAnchor, constant: -4),
+            cancelButton.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 20),
+            cancelButton.trailingAnchor.constraint(equalTo: specsContainer.centerXAnchor, constant: -4),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
             cancelButton.topAnchor.constraint(equalTo: colorCollection.bottomAnchor),
         ])
