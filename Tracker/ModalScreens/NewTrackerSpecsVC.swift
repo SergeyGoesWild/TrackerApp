@@ -46,8 +46,8 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     @objc private func createButtonPressed() {
-        let specsVC = NewTrackerSpecsVC()
-        navigationController?.pushViewController(specsVC, animated: true)
+        let scheduleVC = ScheduleVC()
+        navigationController?.pushViewController(scheduleVC, animated: true)
     }
     
     @objc private func cancelButtonPressed() {
