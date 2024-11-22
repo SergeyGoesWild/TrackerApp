@@ -17,12 +17,12 @@ class RootViewController: UIViewController {
     func loadMainScreen(){
         let tabBarController = UITabBarController()
         
-        let trackersViewController = TrackersViewController()
+        let trackersViewController = TrackersVC()
         let trackersNavController = UINavigationController(rootViewController: trackersViewController)
         trackersNavController.isNavigationBarHidden = true
         trackersNavController.tabBarItem = UITabBarItem(title: "Трекеры", image: UIImage(named: "TrackerTabIcon.png"), tag: 0)
         
-        let statViewController = StatViewController()
+        let statViewController = StatVC()
         let statNavController = UINavigationController(rootViewController: statViewController)
         statNavController.isNavigationBarHidden = true
         statNavController.tabBarItem = UITabBarItem(title: "Статистика", image: UIImage(named: "StatTabIcon.png"), tag: 1)

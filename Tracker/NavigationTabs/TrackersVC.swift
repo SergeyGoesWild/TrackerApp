@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-final class TrackersViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+final class TrackersVC: UIViewController {
     
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
@@ -40,51 +40,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
         dateFormatter.dateFormat = "dd.MM.yyyy" // Формат даты
         let formattedDate = dateFormatter.string(from: selectedDate)
         print("Выбранная дата: \(formattedDate)")
-    }
-    
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categories.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categories[section].categoryTrackers.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
-        return cell!
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as! TrackerHeader
-        
-        //            let label = UILabel(frame: header.bounds)
-        //            label.text = "Section \(indexPath.section + 1)"
-        //            label.textAlignment = .center
-        //            label.textColor = .white
-        
-        return header
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let cellWidth = (collectionView.bounds.width - 7) / CGFloat(2)
-        return CGSize(width: cellWidth, height: cellWidth * 0.88)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.bounds.width, height: 18)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 7
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 12, left: 0, bottom: 16, right: 0)
     }
     
     private func setupTrackerScreen() {
@@ -170,5 +125,58 @@ final class TrackersViewController: UIViewController, UICollectionViewDataSource
             trackerCollection.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 24),
             trackerCollection.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
+    }
+}
+
+extension TrackersVC: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return categories.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return categories[section].categoryTrackers.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
+        return cell!
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as! TrackerHeader
+        
+        //            let label = UILabel(frame: header.bounds)
+        //            label.text = "Section \(indexPath.section + 1)"
+        //            label.textAlignment = .center
+        //            label.textColor = .white
+        
+        return header
+    }
+}
+
+extension TrackersVC: UICollectionViewDelegate {
+    
+}
+
+extension TrackersVC: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let cellWidth = (collectionView.bounds.width - 7) / CGFloat(2)
+        return CGSize(width: cellWidth, height: cellWidth * 0.88)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 18)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 7
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 12, left: 0, bottom: 16, right: 0)
     }
 }
