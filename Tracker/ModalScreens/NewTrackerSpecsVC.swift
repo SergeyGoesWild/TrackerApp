@@ -46,7 +46,7 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     @objc private func createButtonPressed() {
-        let scheduleVC = ScheduleVC()
+        let scheduleVC = CategoryListVC()
         navigationController?.pushViewController(scheduleVC, animated: true)
     }
     
@@ -230,6 +230,23 @@ extension NewTrackerSpecsVC: UITableViewDelegate {
         let totalHeight = tableView.bounds.height
         let rowHeight = totalHeight / CGFloat(specsList.count)
         return rowHeight
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedCell = tableView.cellForRow(at: indexPath)
+        switch selectedCell?.textLabel?.text {
+        case "Категория":
+            tableView.deselectRow(at: indexPath, animated: true)
+            let nextScreen = CategoryListVC()
+            navigationController?.pushViewController(nextScreen, animated: true)
+        case "Расписание":
+            tableView.deselectRow(at: indexPath, animated: true)
+            let nextScreen = ScheduleVC()
+            navigationController?.pushViewController(nextScreen, animated: true)
+        default:
+            tableView.deselectRow(at: indexPath, animated: true)
+            print("Ни один из вариантов")
+        }
     }
 }
 
