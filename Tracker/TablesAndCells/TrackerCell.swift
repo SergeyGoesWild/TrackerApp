@@ -10,7 +10,15 @@ import UIKit
 
 final class TrackerCell: UICollectionViewCell {
     
-    var dataModel: Tracker!
+    var dataModel: Tracker? {
+        didSet {
+            guard let dataModel = dataModel else { return }
+            coloredBackground.backgroundColor = dataModel.color
+            emojiLabel.text = dataModel.emoji
+            titleLabel.text = dataModel.trackerName
+            addDayButton.backgroundColor = dataModel.color
+        }
+    }
     
     var coloredBackground: UIView!
     var emojiCircle: UIView!
@@ -21,7 +29,6 @@ final class TrackerCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        dataModel = Tracker(trackerID: UUID(), trackerName: "Поливать растения", color: UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 1.00), emoji: "❤", schedule: ["Monday"])
         setupTrackerView()
     }
     
@@ -33,7 +40,6 @@ final class TrackerCell: UICollectionViewCell {
         
         coloredBackground = UIView()
         coloredBackground.translatesAutoresizingMaskIntoConstraints = false
-        coloredBackground.backgroundColor = dataModel.color
         coloredBackground.layer.cornerRadius = CGFloat(16)
         contentView.addSubview(coloredBackground)
         
@@ -46,12 +52,10 @@ final class TrackerCell: UICollectionViewCell {
         emojiLabel = UILabel()
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
         emojiLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
-        emojiLabel.text = dataModel.emoji
         contentView.addSubview(emojiLabel)
         
         titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = dataModel.trackerName
         titleLabel.font = UIFont.systemFont(ofSize: 12)
         titleLabel.textColor = .white
         contentView.addSubview(titleLabel)
@@ -64,7 +68,6 @@ final class TrackerCell: UICollectionViewCell {
         
         addDayButton = UIButton()
         addDayButton.translatesAutoresizingMaskIntoConstraints = false
-        addDayButton.backgroundColor = dataModel.color
         addDayButton.setImage(UIImage(named: "PlusIconSVG")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
         addDayButton.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         addDayButton.layer.cornerRadius = 17

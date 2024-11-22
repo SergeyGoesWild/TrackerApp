@@ -13,6 +13,10 @@ final class TrackersVC: UIViewController {
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
     
+    var titleLabel: UILabel!
+    var plusButton: UIButton!
+    var datePicker: UIDatePicker!
+    var searchBar: UISearchBar!
     var trackerCollection: UICollectionView!
     
     override func viewDidLoad() {
@@ -45,7 +49,7 @@ final class TrackersVC: UIViewController {
     private func setupTrackerScreen() {
         view.backgroundColor = .white
         
-        let titleLabel = UILabel()
+        titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = "Трекеры"
         titleLabel.font = .systemFont(ofSize: 34, weight: .bold)
@@ -53,7 +57,7 @@ final class TrackersVC: UIViewController {
         titleLabel.textAlignment = .left
         view.addSubview(titleLabel)
         
-        let plusButton = UIButton()
+        plusButton = UIButton()
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         plusButton.setImage(UIImage(named: "PlusIconSVG"), for: .normal)
         plusButton.setTitle("", for: .normal)
@@ -61,7 +65,7 @@ final class TrackersVC: UIViewController {
         plusButton.addTarget(self, action: #selector(plusButtonPressed), for: .touchUpInside)
         view.addSubview(plusButton)
         
-        let datePicker = UIDatePicker()
+        datePicker = UIDatePicker()
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
@@ -76,33 +80,18 @@ final class TrackersVC: UIViewController {
         
         //TODO: насторить звезду по середине видимой части
         //TODO: проверить поля у этого элемента, они как будто больше
-        let searchBar = UISearchBar()
+        searchBar = UISearchBar()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.placeholder = "Поиск"
         searchBar.sizeToFit()
         searchBar.searchBarStyle = .minimal
         view.addSubview(searchBar)
         
-        let starImage = UIImageView()
-        starImage.translatesAutoresizingMaskIntoConstraints = false
-        starImage.image = UIImage(named: "StarIcon")
-        view.addSubview(starImage)
-        
-        let starTextLabel = UILabel()
-        starTextLabel.translatesAutoresizingMaskIntoConstraints = false
-        starTextLabel.text = "Что будем отслеживать?"
-        starTextLabel.font = .systemFont(ofSize: 12, weight: .regular)
-        starTextLabel.textColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
-        starTextLabel.textAlignment = .center
-        view.addSubview(starTextLabel)
-        
-        trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-        trackerCollection.translatesAutoresizingMaskIntoConstraints = false
-        trackerCollection.register(TrackerCell.self, forCellWithReuseIdentifier: "OneTracker")
-        trackerCollection.register(TrackerHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "Header")
-        trackerCollection.dataSource = self
-        trackerCollection.delegate = self
-        view.addSubview(trackerCollection)
+        if categories.isEmpty {
+            setupNoTrackers()
+        } else {
+            setupWithTrackers()
+        }
         
         NSLayoutConstraint.activate([
             plusButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 6),
@@ -116,10 +105,41 @@ final class TrackersVC: UIViewController {
             searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
             searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+        ])
+    }
+    
+    private func setupNoTrackers() {
+        let starImage = UIImageView()
+        starImage.translatesAutoresizingMaskIntoConstraints = false
+        starImage.image = UIImage(named: "StarIcon")
+        view.addSubview(starImage)
+        
+        let starTextLabel = UILabel()
+        starTextLabel.translatesAutoresizingMaskIntoConstraints = false
+        starTextLabel.text = "Что будем отслеживать?"
+        starTextLabel.font = .systemFont(ofSize: 12, weight: .regular)
+        starTextLabel.textColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
+        starTextLabel.textAlignment = .center
+        view.addSubview(starTextLabel)
+        
+        NSLayoutConstraint.activate([
             starImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             starImage.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             starTextLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             starTextLabel.topAnchor.constraint(equalTo: starImage.bottomAnchor, constant: 8),
+        ])
+    }
+    
+    private func setupWithTrackers() {
+        trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        trackerCollection.translatesAutoresizingMaskIntoConstraints = false
+        trackerCollection.register(TrackerCell.self, forCellWithReuseIdentifier: "OneTracker")
+        trackerCollection.register(TrackerHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "Header")
+        trackerCollection.dataSource = self
+        trackerCollection.delegate = self
+        view.addSubview(trackerCollection)
+        
+        NSLayoutConstraint.activate([
             trackerCollection.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             trackerCollection.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             trackerCollection.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 24),
@@ -139,17 +159,12 @@ extension TrackersVC: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
+        cell?.dataModel = categories[indexPath.section].categoryTrackers[indexPath.row]
         return cell!
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as! TrackerHeader
-        
-        //            let label = UILabel(frame: header.bounds)
-        //            label.text = "Section \(indexPath.section + 1)"
-        //            label.textAlignment = .center
-        //            label.textColor = .white
-        
         return header
     }
 }
