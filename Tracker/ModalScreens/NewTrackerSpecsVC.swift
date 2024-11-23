@@ -16,7 +16,7 @@ final class NewTrackerSpecsVC: UIViewController {
     let trackerMock = Tracker(trackerID: UUID(), trackerName: "Погладить крысу", color: UIColor(red: 0.40, green: 0.81, blue: 0.21, alpha: 1.00), emoji: "🐀", schedule: ["Monday"])
     let categoryMock = "Питомцы"
     
-    let specsList = ["Категория", "Расписание"]
+    var specsList = ["Категория", "Расписание"]
     let emojiList = ["🙂", "😻", "🌺", "🐶", "❤", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪",]
     let colorList = [UIColor(red: 0.99, green: 0.30, blue: 0.29, alpha: 1.00),
                      UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00),
@@ -52,7 +52,7 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     @objc private func createButtonPressed() {
-        //TODO: Оставить так или добавить нотификации???
+
         guard var delegate = delegate else { return }
         if let index = delegate.categories.firstIndex(where: { $0.categoryTitle == categoryMock }) {
             delegate.categories[index].categoryTrackers.append(trackerMock)
@@ -76,8 +76,10 @@ final class NewTrackerSpecsVC: UIViewController {
     
     private func setupTrackerSpecsView() {
         view.backgroundColor = .white
-        navigationItem.title = "Новая привычка"
+        navigationItem.title = newTrackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
         navigationItem.hidesBackButton = true
+        
+        specsList = newTrackerType == .habit ? ["Категория", "Расписание"] : ["Категория"]
         
         specsScrollView = UIScrollView()
         specsScrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -169,7 +171,7 @@ final class NewTrackerSpecsVC: UIViewController {
             specsTable.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 16),
             specsTable.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -16),
             specsTable.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 24),
-            specsTable.heightAnchor.constraint(equalToConstant: 150),
+            specsTable.heightAnchor.constraint(equalToConstant: CGFloat(75*specsList.count)),
             
             emojiCollection.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 18),
             emojiCollection.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -18),
