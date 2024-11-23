@@ -8,22 +8,34 @@
 import Foundation
 import UIKit
 
-final class NewTrackerCategoryVC: UIViewController {
+enum trackerTypes {
+    case habit
+    case event
+}
+
+final class NewTrackerTypeVC: UIViewController {
     var habitButton: UIButton!
     var eventButton: UIButton!
     
+    //TODO: посмотреть так вообще нормально пробрасывать?
+    var delegateLink: TrackerSpecsDelegate?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupTrackerCategoryView()
+        setupTrackerTypeView()
     }
     
     @objc private func habitButtonPressed() {
         let specsVC = NewTrackerSpecsVC()
+        specsVC.newTrackerType = .habit
+        specsVC.delegate = delegateLink
         navigationController?.pushViewController(specsVC, animated: true)
     }
     
     @objc private func eventButtonPressed() {
         let specsVC = NewTrackerSpecsVC()
+        specsVC.newTrackerType = .event
+        specsVC.delegate = delegateLink
         navigationController?.pushViewController(specsVC, animated: true)
     }
     
@@ -36,7 +48,7 @@ final class NewTrackerCategoryVC: UIViewController {
 //        }
 //    }
     
-    private func setupTrackerCategoryView() {
+    private func setupTrackerTypeView() {
         view.backgroundColor = .white
         navigationItem.title = "Создание трекера"
         

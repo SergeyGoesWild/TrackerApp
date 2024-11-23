@@ -10,6 +10,12 @@ import UIKit
 
 final class NewTrackerSpecsVC: UIViewController {
     
+    var newTrackerType: trackerTypes?
+    var delegate: TrackerSpecsDelegate?
+    
+    let trackerMock = Tracker(trackerID: UUID(), trackerName: "Погладить крысу", color: UIColor(red: 0.40, green: 0.81, blue: 0.21, alpha: 1.00), emoji: "🐀", schedule: ["Monday"])
+    let categoryMock = "Питомцы"
+    
     let specsList = ["Категория", "Расписание"]
     let emojiList = ["🙂", "😻", "🌺", "🐶", "❤", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪",]
     let colorList = [UIColor(red: 0.99, green: 0.30, blue: 0.29, alpha: 1.00),
@@ -46,8 +52,22 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     @objc private func createButtonPressed() {
-        let scheduleVC = CategoryListVC()
-        navigationController?.pushViewController(scheduleVC, animated: true)
+        //TODO: Оставить так или добавить нотификации???
+        guard var delegate = delegate else { return }
+        if let index = delegate.categories.firstIndex(where: { $0.categoryTitle == categoryMock }) {
+            delegate.categories[index].categoryTrackers.append(trackerMock)
+            let indexPath = IndexPath(item: delegate.categories[index].categoryTrackers.count-1, section: index)
+            delegate.trackerCollection.insertItems(at: [indexPath])
+            dismiss(animated: true, completion: nil)
+        }
+        else {
+            let trackerToAdd = TrackerCategory(categoryTitle: categoryMock, categoryTrackers: [trackerMock])
+            delegate.categories.append(trackerToAdd)
+            let sectionIndex = delegate.categories.count - 1
+            delegate.trackerCollection.insertSections(IndexSet(integer: sectionIndex))
+            dismiss(animated: true, completion: nil)
+        }
+        print(delegate.categories)
     }
     
     @objc private func cancelButtonPressed() {

@@ -8,7 +8,12 @@
 import Foundation
 import UIKit
 
-final class TrackersVC: UIViewController {
+protocol TrackerSpecsDelegate {
+    var categories: [TrackerCategory] { get set }
+    var trackerCollection: UICollectionView! { get set }
+}
+
+final class TrackersVC: UIViewController, TrackerSpecsDelegate {
     
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
@@ -33,7 +38,8 @@ final class TrackersVC: UIViewController {
     
     @objc
     private func plusButtonPressed() {
-        let modalVC = NewTrackerCategoryVC()
+        let modalVC = NewTrackerTypeVC()
+        modalVC.delegateLink = self
         let navController = UINavigationController(rootViewController: modalVC)
         present(navController, animated: true)
     }
