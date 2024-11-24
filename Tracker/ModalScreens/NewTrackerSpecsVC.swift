@@ -8,15 +8,29 @@
 import Foundation
 import UIKit
 
+protocol CommonSpecsDelegate {
+    func didChooseEmoji(emojiToShare: String)
+    func didChooseColor(colorToShare: UIColor)
+}
+
 final class NewTrackerSpecsVC: UIViewController {
     
     var newTrackerType: trackerTypes?
     var delegate: TrackerSpecsDelegate?
     
+    var chosenCategory: String?
+    var chosenTitle: String?
+    var chosenColor: UIColor?
+    var chosenEmoji: String?
+    var chosenSchedule: [String]?
+    
+    var previousChosenEmojiCell: EmojiCell?
+    var previousChosenColorCell: ColorCell?
+    
     let trackerMock = Tracker(trackerID: UUID(), trackerName: "Погладить крысу", color: UIColor(red: 0.40, green: 0.81, blue: 0.21, alpha: 1.00), emoji: "🐀", schedule: ["Monday"])
     let categoryMock = "Питомцы"
     
-    var specsList = ["Категория", "Расписание"]
+    var specsList = [(title: "Категория", subtitle: nil as String?), (title: "Расписание", subtitle: nil as String?)]
     let emojiList = ["🙂", "😻", "🌺", "🐶", "❤", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪",]
     let colorList = [UIColor(red: 0.99, green: 0.30, blue: 0.29, alpha: 1.00),
                      UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00),
@@ -51,6 +65,11 @@ final class NewTrackerSpecsVC: UIViewController {
         setupTrackerSpecsView()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        view.endEditing(true) // Ensure the keyboard is dismissed when leaving the screen
+    }
+    
     @objc private func createButtonPressed() {
 
         guard var delegate = delegate else { return }
@@ -74,12 +93,26 @@ final class NewTrackerSpecsVC: UIViewController {
         dismiss(animated: true, completion: nil)
     }
     
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        print("Text changed to: \(textField.text ?? "")")
+        chosenTitle = textField.text
+    }
+
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     private func setupTrackerSpecsView() {
         view.backgroundColor = .white
         navigationItem.title = newTrackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
         navigationItem.hidesBackButton = true
         
-        specsList = newTrackerType == .habit ? ["Категория", "Расписание"] : ["Категория"]
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+//        view.addGestureRecognizer(tapGesture)
+        
+        specsList = newTrackerType == .habit ?
+        [(title: "Категория", subtitle: nil as String?), (title: "Расписание", subtitle: nil as String?)] :
+        [(title: "Категория", subtitle: nil as String?)]
         
         specsScrollView = UIScrollView()
         specsScrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -90,17 +123,13 @@ final class NewTrackerSpecsVC: UIViewController {
         specsScrollView.addSubview(specsContainer)
         
         titleTextField = UITextField()
-        titleTextField.placeholder = "Введите название трекера"
-        titleTextField.layer.cornerRadius = 16
-        titleTextField.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
-        titleTextField.textColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
-        titleTextField.textAlignment = .left
-        titleTextField.font = .systemFont(ofSize: 17)
-        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: titleTextField.frame.height))
-        titleTextField.leftView = paddingView
-        titleTextField.leftViewMode = .always
         titleTextField.translatesAutoresizingMaskIntoConstraints = false
-        specsScrollView.addSubview(titleTextField)
+        titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        titleTextField.layer.cornerRadius = 16
+        titleTextField.placeholder = "Введите название трекера"
+        titleTextField.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
+        titleTextField.font = UIFont.systemFont(ofSize: 17)
+        specsContainer.addSubview(titleTextField)
         
         specsTable = UITableView(frame: .zero, style: .plain)
         specsTable.dataSource = self
@@ -111,7 +140,7 @@ final class NewTrackerSpecsVC: UIViewController {
         specsTable.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         specsTable.tableFooterView = UIView(frame: .zero)
         //TODO: поправить линии сепараторы
-        specsScrollView.addSubview(specsTable)
+        specsContainer.addSubview(specsTable)
         
         emojiCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         emojiCollection.register(EmojiCell.self, forCellWithReuseIdentifier: "emojiCell")
@@ -120,7 +149,7 @@ final class NewTrackerSpecsVC: UIViewController {
         emojiCollection.delegate = self
         emojiCollection.dataSource = self
         emojiCollection.tag = 1
-        specsScrollView.addSubview(emojiCollection)
+        specsContainer.addSubview(emojiCollection)
         
         colorCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         colorCollection.register(ColorCell.self, forCellWithReuseIdentifier: "colorCell")
@@ -129,7 +158,7 @@ final class NewTrackerSpecsVC: UIViewController {
         colorCollection.delegate = self
         colorCollection.dataSource = self
         colorCollection.tag = 2
-        specsScrollView.addSubview(colorCollection)
+        specsContainer.addSubview(colorCollection)
         
         createButton = UIButton(type: .system)
         createButton.setTitle("Создать", for: .normal)
@@ -138,7 +167,7 @@ final class NewTrackerSpecsVC: UIViewController {
         createButton.setTitleColor(.white, for: .normal)
         createButton.translatesAutoresizingMaskIntoConstraints = false
         createButton.addTarget(self, action: #selector(createButtonPressed), for: .touchUpInside)
-        specsScrollView.addSubview(createButton)
+        specsContainer.addSubview(createButton)
         
         cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
@@ -148,7 +177,7 @@ final class NewTrackerSpecsVC: UIViewController {
         cancelButton.setTitleColor(UIColor(red: 0.96, green: 0.42, blue: 0.42, alpha: 1.00), for: .normal)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.addTarget(self, action: #selector(cancelButtonPressed), for: .touchUpInside)
-        specsScrollView.addSubview(cancelButton)
+        specsContainer.addSubview(cancelButton)
         
         NSLayoutConstraint.activate([
             specsScrollView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -198,16 +227,32 @@ final class NewTrackerSpecsVC: UIViewController {
     }
 }
 
-extension NewTrackerSpecsVC: UITextFieldDelegate {
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        //TODO: Настроить сохранение текста из формы
-        //        trackerTitle = textField.text
-        //        print("Input saved: \(trackerTitle ?? "No input")")
-    }
-}
-
 extension NewTrackerSpecsVC: UICollectionViewDelegate {
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView.tag == 1 {
+            if let cell = collectionView.cellForItem(at: indexPath) as? EmojiCell {
+                if let previousChosenEmojiCell {
+                    previousChosenEmojiCell.backgroundColor = nil
+                }
+                chosenEmoji = cell.emojiCellLabel.text
+                cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 1.00)
+                cell.layer.cornerRadius = 16
+                previousChosenEmojiCell = cell
+            }
+        } else {
+            if let cell = collectionView.cellForItem(at: indexPath) as? ColorCell {
+                if let previousChosenColorCell {
+                    previousChosenColorCell.layer.borderColor = nil
+                    previousChosenColorCell.layer.borderWidth = 0
+                }
+                chosenColor = cell.colorView.backgroundColor
+                cell.layer.borderColor = UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 0.30).cgColor
+                cell.layer.borderWidth = 3
+                cell.layer.cornerRadius = 8
+                previousChosenColorCell = cell
+            }
+        }
+    }
 }
 
 extension NewTrackerSpecsVC: UICollectionViewDataSource {
@@ -264,6 +309,7 @@ extension NewTrackerSpecsVC: UITableViewDelegate {
         case "Расписание":
             tableView.deselectRow(at: indexPath, animated: true)
             let nextScreen = ScheduleVC()
+            nextScreen.delegate = self
             navigationController?.pushViewController(nextScreen, animated: true)
         default:
             tableView.deselectRow(at: indexPath, animated: true)
@@ -279,9 +325,15 @@ extension NewTrackerSpecsVC: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "specsCell", for: indexPath)
-        cell.textLabel?.text = specsList[indexPath.row]
+        cell.textLabel?.text = specsList[indexPath.row].title
         cell.accessoryType = .disclosureIndicator
         cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         return cell
+    }
+}
+
+extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
+    func didSetSchedule(scheduleArray: [dayOfWeek]) {
+        chosenSchedule = scheduleArray.map({ $0.engName })
     }
 }

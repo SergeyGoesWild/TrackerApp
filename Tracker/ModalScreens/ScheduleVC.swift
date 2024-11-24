@@ -8,9 +8,29 @@
 import Foundation
 import UIKit
 
+struct dayOfWeek {
+    let orderInt: Int
+    let fullName: String
+    let shortName: String
+    let engName: String
+}
+
+protocol ScheduleDelegateProtocol {
+    func didSetSchedule(scheduleArray: [dayOfWeek])
+}
+
 final class ScheduleVC: UIViewController {
     
-    let daysOfWeek = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+    let daysOfWeek = [dayOfWeek(orderInt: 0, fullName: "Понедельник", shortName: "Пн", engName: "Monday"),
+                      dayOfWeek(orderInt: 1, fullName: "Вторник", shortName: "Вт", engName: "Tuesday"),
+                      dayOfWeek(orderInt: 2, fullName: "Среда", shortName: "Ср", engName: "Wednesday"),
+                      dayOfWeek(orderInt: 3, fullName: "Четверг", shortName: "Чт", engName: "Thursday"),
+                      dayOfWeek(orderInt: 4, fullName: "Пятница", shortName: "Пт", engName: "Friday"),
+                      dayOfWeek(orderInt: 5, fullName: "Суббота", shortName: "Сб", engName: "Saturday"),
+                      dayOfWeek(orderInt: 6, fullName: "Воскресенье", shortName: "Вс", engName: "Sunday")]
+    
+    var scheduleSelection: [dayOfWeek] = []
+    var delegate: ScheduleDelegateProtocol?
     
     var scheduleTableView: UITableView!
     var doneScheduleButton: UIButton!
@@ -21,11 +41,30 @@ final class ScheduleVC: UIViewController {
     }
     
     @objc private func doneScheduleButtonPressed() {
+        guard let delegate else { return }
+        scheduleSelection.sort(by: { $0.orderInt < $1.orderInt })
+        delegate.didSetSchedule(scheduleArray: scheduleSelection)
         navigationController?.popViewController(animated: true)
     }
     
     @objc func switchToggled(_ sender: UISwitch) {
-            print("Switch at row \(sender.tag) is now \(sender.isOn ? "ON" : "OFF")")
+        if sender.isOn {
+            scheduleSelection.append(daysOfWeek[sender.tag])
+        } else {
+            let elementToRemove = daysOfWeek[sender.tag]
+            scheduleSelection.removeAll(where: { $0.fullName == elementToRemove.fullName })
+        }
+        updateButtonState()
+    }
+    
+    private func updateButtonState() {
+        if scheduleSelection.count > 0 {
+            doneScheduleButton.isEnabled = true
+            doneScheduleButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
+        } else {
+            doneScheduleButton.isEnabled = false
+            doneScheduleButton.backgroundColor = UIColor(red: 0.68, green: 0.69, blue: 0.71, alpha: 1.00)
+        }
     }
     
     private func setupScheduleVC() {
@@ -44,9 +83,10 @@ final class ScheduleVC: UIViewController {
         view.addSubview(scheduleTableView)
         
         doneScheduleButton = UIButton(type: .system)
+        doneScheduleButton.isEnabled = false
         doneScheduleButton.setTitle("Готово", for: .normal)
         doneScheduleButton.layer.cornerRadius = 16
-        doneScheduleButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
+        doneScheduleButton.backgroundColor = UIColor(red: 0.68, green: 0.69, blue: 0.71, alpha: 1.00)
         doneScheduleButton.setTitleColor(.white, for: .normal)
         doneScheduleButton.translatesAutoresizingMaskIntoConstraints = false
         doneScheduleButton.addTarget(self, action: #selector(doneScheduleButtonPressed), for: .touchUpInside)
@@ -80,7 +120,7 @@ extension ScheduleVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //TODO: Здесь тоже удалить лишние сепараторы
         let cell = tableView.dequeueReusableCell(withIdentifier: "scheduleCell", for: indexPath)
-        cell.textLabel?.text = daysOfWeek[indexPath.row]
+        cell.textLabel?.text = daysOfWeek[indexPath.row].fullName
         cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         let switchControl = UISwitch()
         switchControl.onTintColor = UIColor(red: 0.22, green: 0.45, blue: 0.91, alpha: 1.00)
