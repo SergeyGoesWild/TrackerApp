@@ -59,12 +59,20 @@ final class ScheduleVC: UIViewController {
     
     private func updateButtonState() {
         if scheduleSelection.count > 0 {
-            doneScheduleButton.isEnabled = true
-            doneScheduleButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
+            enableDoneButton()
         } else {
-            doneScheduleButton.isEnabled = false
-            doneScheduleButton.backgroundColor = UIColor(red: 0.68, green: 0.69, blue: 0.71, alpha: 1.00)
+            disableDoneButton()
         }
+    }
+    
+    private func enableDoneButton() {
+        doneScheduleButton.isEnabled = true
+        doneScheduleButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
+    }
+    
+    private func disableDoneButton() {
+        doneScheduleButton.isEnabled = false
+        doneScheduleButton.backgroundColor = UIColor(red: 0.68, green: 0.69, blue: 0.71, alpha: 1.00)
     }
     
     private func setupScheduleVC() {
@@ -83,10 +91,16 @@ final class ScheduleVC: UIViewController {
         view.addSubview(scheduleTableView)
         
         doneScheduleButton = UIButton(type: .system)
-        doneScheduleButton.isEnabled = false
+        print(scheduleSelection.count)
+        if scheduleSelection.count > 0 {
+            print("ENABLING")
+            enableDoneButton()
+        } else {
+            print("DISABLING")
+            disableDoneButton()
+        }
         doneScheduleButton.setTitle("Готово", for: .normal)
         doneScheduleButton.layer.cornerRadius = 16
-        doneScheduleButton.backgroundColor = UIColor(red: 0.68, green: 0.69, blue: 0.71, alpha: 1.00)
         doneScheduleButton.setTitleColor(.white, for: .normal)
         doneScheduleButton.translatesAutoresizingMaskIntoConstraints = false
         doneScheduleButton.addTarget(self, action: #selector(doneScheduleButtonPressed), for: .touchUpInside)
@@ -119,10 +133,15 @@ extension ScheduleVC: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //TODO: Здесь тоже удалить лишние сепараторы
+        let currentItem = daysOfWeek[indexPath.row]
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "scheduleCell", for: indexPath)
         cell.textLabel?.text = daysOfWeek[indexPath.row].fullName
         cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         let switchControl = UISwitch()
+        if scheduleSelection.contains(where: { $0.fullName == currentItem.fullName }) {
+            switchControl.isOn = true
+        }
         switchControl.onTintColor = UIColor(red: 0.22, green: 0.45, blue: 0.91, alpha: 1.00)
         switchControl.addTarget(self, action: #selector(switchToggled), for: .valueChanged)
         switchControl.tag = indexPath.row

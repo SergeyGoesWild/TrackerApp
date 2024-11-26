@@ -22,7 +22,7 @@ final class NewTrackerSpecsVC: UIViewController {
     var chosenTitle: String?
     var chosenColor: UIColor?
     var chosenEmoji: String?
-    var chosenSchedule: [String]?
+    var chosenSchedule: [dayOfWeek]?
     
     var previousChosenEmojiCell: EmojiCell?
     var previousChosenColorCell: ColorCell?
@@ -110,6 +110,7 @@ final class NewTrackerSpecsVC: UIViewController {
 //        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
 //        view.addGestureRecognizer(tapGesture)
         
+        //TODO: может этот кусок кода переделать
         specsList = newTrackerType == .habit ?
         [(title: "Категория", subtitle: nil as String?), (title: "Расписание", subtitle: nil as String?)] :
         [(title: "Категория", subtitle: nil as String?)]
@@ -134,7 +135,8 @@ final class NewTrackerSpecsVC: UIViewController {
         specsTable = UITableView(frame: .zero, style: .plain)
         specsTable.dataSource = self
         specsTable.delegate = self
-        specsTable.register(UITableViewCell.self, forCellReuseIdentifier: "specsCell")
+        specsTable.register(UITableViewCell.self, forCellReuseIdentifier: "specsCellTitle")
+        specsTable.register(UITableViewCell.self, forCellReuseIdentifier: "specsCellSubtitle")
         specsTable.translatesAutoresizingMaskIntoConstraints = false
         specsTable.layer.cornerRadius = 16
         specsTable.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
@@ -310,6 +312,9 @@ extension NewTrackerSpecsVC: UITableViewDelegate {
             tableView.deselectRow(at: indexPath, animated: true)
             let nextScreen = ScheduleVC()
             nextScreen.delegate = self
+            if let chosenSchedule {
+                nextScreen.scheduleSelection.append(contentsOf: chosenSchedule)
+            }
             navigationController?.pushViewController(nextScreen, animated: true)
         default:
             tableView.deselectRow(at: indexPath, animated: true)
@@ -324,8 +329,22 @@ extension NewTrackerSpecsVC: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "specsCell", for: indexPath)
-        cell.textLabel?.text = specsList[indexPath.row].title
+        let item = specsList[indexPath.row]
+        
+        let cell: UITableViewCell
+        if let subtitle = item.subtitle {
+            cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
+            cell.detailTextLabel?.text = subtitle
+        } else {
+            cell = UITableViewCell(style: .default, reuseIdentifier: nil)
+        }
+//        let identifier = specsList[indexPath.row].subtitle != nil ? "specsCellSubtitle" : "specsCellTitle"
+//        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
+//        cell.textLabel?.text = specsList[indexPath.row].title
+//        if let subTitle = specsList[indexPath.row].subtitle {
+//            cell.detailTextLabel?.text = subTitle
+//        }
+        cell.textLabel?.text = item.title
         cell.accessoryType = .disclosureIndicator
         cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         return cell
@@ -334,6 +353,11 @@ extension NewTrackerSpecsVC: UITableViewDataSource {
 
 extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
     func didSetSchedule(scheduleArray: [dayOfWeek]) {
-        chosenSchedule = scheduleArray.map({ $0.engName })
+        chosenSchedule = scheduleArray
+        let stringToSubtitle = scheduleArray.map { $0.shortName }.joined(separator: ", ")
+        specsList[1].subtitle = stringToSubtitle
+        //TODO: заменить это на reloadRows
+        specsTable.reloadData()
+//        specsTable.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .automatic)
     }
 }
