@@ -123,6 +123,7 @@ final class NewTrackerSpecsVC: UIViewController {
         specsContainer.translatesAutoresizingMaskIntoConstraints = false
         specsScrollView.addSubview(specsContainer)
         
+        //TODO: сделать лимит на кол во символов
         titleTextField = UITextField()
         titleTextField.translatesAutoresizingMaskIntoConstraints = false
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
@@ -307,6 +308,10 @@ extension NewTrackerSpecsVC: UITableViewDelegate {
         case "Категория":
             tableView.deselectRow(at: indexPath, animated: true)
             let nextScreen = CategoryListVC()
+            nextScreen.delegate = self
+            if let chosenCategory {
+                nextScreen.categorySelection = chosenCategory
+            }
             navigationController?.pushViewController(nextScreen, animated: true)
         case "Расписание":
             tableView.deselectRow(at: indexPath, animated: true)
@@ -327,7 +332,7 @@ extension NewTrackerSpecsVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return specsList.count
     }
-    
+    //TODO: проверить соответствует ли сабтайтл макету по цвету
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = specsList[indexPath.row]
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
@@ -347,5 +352,14 @@ extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
         //TODO: заменить это на reloadRows
         specsTable.reloadData()
 //        specsTable.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .automatic)
+    }
+}
+
+extension NewTrackerSpecsVC: CategoryDelegateProtocol {
+    func didReceiveCategory(categoryTitle: String) {
+        chosenCategory = categoryTitle
+        specsList[0].subtitle = categoryTitle
+        //TODO: заменить это на reloadRows
+        specsTable.reloadData()
     }
 }

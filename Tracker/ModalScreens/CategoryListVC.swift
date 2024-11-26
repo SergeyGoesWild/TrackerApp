@@ -7,14 +7,22 @@
 
 import Foundation
 import UIKit
+    
+protocol CategoryDelegateProtocol: AnyObject {
+    func didReceiveCategory(categoryTitle: String)
+}
 
 final class CategoryListVC: UIViewController {
     
+    //TODO: поменять все ссылки делегатов на слабые
+    weak var delegate: CategoryDelegateProtocol?
     let categoriez = ["Важное", "Норм", "Так себе"]
-    var selectedIndexPath: IndexPath?
+    var categorySelection: String?
     
     var categoryTableView: UITableView!
     var addCategoryButton: UIButton!
+    var emptyListImage: UIImageView!
+    var emptyListLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,11 +33,31 @@ final class CategoryListVC: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    private func setupCategoryListVC() {
-        view.backgroundColor = .white
-        navigationItem.title = "Категория"
-        navigationItem.hidesBackButton = true
+    private func setupEmptyCategoryScreen() {
+        emptyListImage = UIImageView()
+        emptyListImage.image = UIImage(named: "StarIcon")
+        emptyListImage.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyListImage)
         
+        emptyListLabel = UILabel()
+        emptyListLabel.text = "Привычки и события можно\nобъединить по смыслу"
+        emptyListLabel.font = .systemFont(ofSize: 12)
+        //TODO: настроить межстрочный интервал
+        emptyListLabel.numberOfLines = 0
+        emptyListLabel.textAlignment = .center
+        emptyListLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyListLabel)
+        
+        NSLayoutConstraint.activate([
+            emptyListImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyListImage.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -386),
+            
+            emptyListLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyListLabel.topAnchor.constraint(equalTo: emptyListImage.bottomAnchor, constant: 8)
+        ])
+    }
+    
+    private func setupNoNEmptyCategoryScreen() {
         categoryTableView = UITableView(frame: .zero, style: .plain)
         categoryTableView.translatesAutoresizingMaskIntoConstraints = false
         categoryTableView.register(UITableViewCell.self, forCellReuseIdentifier: "categoryCell")
@@ -39,6 +67,25 @@ final class CategoryListVC: UIViewController {
         categoryTableView.delegate = self
         categoryTableView.dataSource = self
         view.addSubview(categoryTableView)
+        
+        NSLayoutConstraint.activate([
+            categoryTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            categoryTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            categoryTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            categoryTableView.heightAnchor.constraint(equalToConstant: CGFloat(75*categoriez.count)),
+        ])
+    }
+    
+    private func setupCategoryListVC() {
+        view.backgroundColor = .white
+        navigationItem.title = "Категория"
+        navigationItem.hidesBackButton = true
+        
+        if categoriez.isEmpty {
+            setupEmptyCategoryScreen()
+        } else {
+            setupNoNEmptyCategoryScreen()
+        }
         
         addCategoryButton = UIButton(type: .system)
         addCategoryButton.setTitle("Добавить категорию", for: .normal)
@@ -50,11 +97,6 @@ final class CategoryListVC: UIViewController {
         view.addSubview(addCategoryButton)
         
         NSLayoutConstraint.activate([
-            categoryTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            categoryTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            categoryTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            categoryTableView.heightAnchor.constraint(equalToConstant: 525),
-            
             addCategoryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             addCategoryButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             addCategoryButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
@@ -69,17 +111,22 @@ extension CategoryListVC: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if let selectedIndex = selectedIndexPath {
-            let previousCell = tableView.cellForRow(at: selectedIndex)
+        if let categorySelection {
+            let previousCellIndex = categoriez.firstIndex(where: {$0 == categorySelection} )
+            //TODO: избавиться от force unwrap
+            let previousCell = tableView.cellForRow(at: IndexPath(row: previousCellIndex!, section: 0))
             previousCell?.accessoryType = .none
         }
         
-        selectedIndexPath = indexPath
         let selectedCell = tableView.cellForRow(at: indexPath)
         selectedCell?.accessoryType = .checkmark
         
+        guard let stringForDelegate = selectedCell?.textLabel?.text else { return }
+        delegate?.didReceiveCategory(categoryTitle: stringForDelegate)
         tableView.deselectRow(at: indexPath, animated: true)
-        navigationController?.popViewController(animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.navigationController?.popViewController(animated: true)
+        }
     }
 }
 
@@ -90,10 +137,11 @@ extension CategoryListVC: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //TODO: Здесь тоже удалить лишние сепараторы
+        let currentItem = categoriez[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
         cell.textLabel?.text = categoriez[indexPath.row]
         cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
-        if indexPath == selectedIndexPath {
+        if currentItem == categorySelection {
             cell.accessoryType = .checkmark
         } else {
             cell.accessoryType = .none
