@@ -20,7 +20,7 @@
 		2A9F02FC2CEB61FF00AB58BA /* NewTrackerSpecsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F02FB2CEB61FF00AB58BA /* NewTrackerSpecsVC.swift */; };
 		2A9F02FE2CEB639800AB58BA /* NewTrackerTypeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F02FD2CEB639800AB58BA /* NewTrackerTypeVC.swift */; };
 		2A9F03032CECBBC800AB58BA /* EmojiCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F03022CECBBC800AB58BA /* EmojiCell.swift */; };
-		2A9F03052CECBD6500AB58BA /* EmojiHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F03042CECBD6500AB58BA /* EmojiHeader.swift */; };
+		2A9F03052CECBD6500AB58BA /* NewTrackerHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F03042CECBD6500AB58BA /* NewTrackerHeader.swift */; };
 		2A9F03072CEE91B400AB58BA /* ColorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F03062CEE91B400AB58BA /* ColorCell.swift */; };
 		2A9F03092CEF660400AB58BA /* ScheduleVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F03082CEF660400AB58BA /* ScheduleVC.swift */; };
 		2A9F030B2CEFF7CA00AB58BA /* CategoryListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9F030A2CEFF7CA00AB58BA /* CategoryListVC.swift */; };
@@ -43,7 +43,7 @@
 		2A9F02FB2CEB61FF00AB58BA /* NewTrackerSpecsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTrackerSpecsVC.swift; sourceTree = "<group>"; };
 		2A9F02FD2CEB639800AB58BA /* NewTrackerTypeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTrackerTypeVC.swift; sourceTree = "<group>"; };
 		2A9F03022CECBBC800AB58BA /* EmojiCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCell.swift; sourceTree = "<group>"; };
-		2A9F03042CECBD6500AB58BA /* EmojiHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiHeader.swift; sourceTree = "<group>"; };
+		2A9F03042CECBD6500AB58BA /* NewTrackerHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTrackerHeader.swift; sourceTree = "<group>"; };
 		2A9F03062CEE91B400AB58BA /* ColorCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorCell.swift; sourceTree = "<group>"; };
 		2A9F03082CEF660400AB58BA /* ScheduleVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleVC.swift; sourceTree = "<group>"; };
 		2A9F030A2CEFF7CA00AB58BA /* CategoryListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryListVC.swift; sourceTree = "<group>"; };
@@ -110,7 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				2A9F02F92CE7873C00AB58BA /* TrackerHeader.swift */,
-				2A9F03042CECBD6500AB58BA /* EmojiHeader.swift */,
+				2A9F03042CECBD6500AB58BA /* NewTrackerHeader.swift */,
 				2A9F02F72CE5462F00AB58BA /* TrackerCell.swift */,
 				2A9F03022CECBBC800AB58BA /* EmojiCell.swift */,
 				2A9F03062CEE91B400AB58BA /* ColorCell.swift */,
@@ -208,7 +208,7 @@
 				2A9F03032CECBBC800AB58BA /* EmojiCell.swift in Sources */,
 				2A9F02FC2CEB61FF00AB58BA /* NewTrackerSpecsVC.swift in Sources */,
 				2A9888C32CD93CBE0017C48D /* AppDelegate.swift in Sources */,
-				2A9F03052CECBD6500AB58BA /* EmojiHeader.swift in Sources */,
+				2A9F03052CECBD6500AB58BA /* NewTrackerHeader.swift in Sources */,
 				2A9888DD2CDA27DA0017C48D /* StatVC.swift in Sources */,
 				2A9F03072CEE91B400AB58BA /* ColorCell.swift in Sources */,
 				2A9888C52CD93CBE0017C48D /* SceneDelegate.swift in Sources */,

@@ -168,7 +168,7 @@ final class NewTrackerSpecsVC: UIViewController {
         
         emojiCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         emojiCollection.register(EmojiCell.self, forCellWithReuseIdentifier: "emojiCell")
-        emojiCollection.register(EmojiHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "emojiHeader")
+        emojiCollection.register(NewTrackerHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "newTrackerHeader")
         emojiCollection.translatesAutoresizingMaskIntoConstraints = false
         emojiCollection.delegate = self
         emojiCollection.dataSource = self
@@ -177,7 +177,7 @@ final class NewTrackerSpecsVC: UIViewController {
         
         colorCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         colorCollection.register(ColorCell.self, forCellWithReuseIdentifier: "colorCell")
-        colorCollection.register(EmojiHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "emojiHeader")
+        colorCollection.register(NewTrackerHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "newTrackerHeader")
         colorCollection.translatesAutoresizingMaskIntoConstraints = false
         colorCollection.delegate = self
         colorCollection.dataSource = self
@@ -301,8 +301,8 @@ extension NewTrackerSpecsVC: UICollectionViewDataSource {
                         at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
-            withReuseIdentifier: "emojiHeader",
-            for: indexPath) as! EmojiHeader
+            withReuseIdentifier: "newTrackerHeader",
+            for: indexPath) as! NewTrackerHeader
         header.labelText = headerList[collectionView.tag - 1]
         return header
     }
@@ -311,7 +311,6 @@ extension NewTrackerSpecsVC: UICollectionViewDataSource {
 
 extension NewTrackerSpecsVC: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        let cellWidth = (collectionView.bounds.width - 5 * 5) / CGFloat(6)
         return CGSize(width: 52, height: 52)
     }
     
