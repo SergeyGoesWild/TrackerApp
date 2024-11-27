@@ -19,6 +19,7 @@ final class NewTrackerTypeVC: UIViewController {
     
     //TODO: посмотреть так вообще нормально пробрасывать?
     var delegateLink: TrackerSpecsDelegate?
+    var delegateListShare: [String]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,6 +30,8 @@ final class NewTrackerTypeVC: UIViewController {
         let specsVC = NewTrackerSpecsVC()
         specsVC.newTrackerType = .habit
         specsVC.delegate = delegateLink
+        guard let delegateListShare else { return }
+        specsVC.possibleCategories.append(contentsOf: delegateListShare)
         navigationController?.pushViewController(specsVC, animated: true)
     }
     

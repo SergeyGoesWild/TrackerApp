@@ -10,12 +10,14 @@ import UIKit
 
 protocol TrackerSpecsDelegate {
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
+    func didReceiveCategoriesList(newList: [String])
 }
 
 final class TrackersVC: UIViewController {
     
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
+    var allPossibleCategories: [String] = []
     
     var titleLabel: UILabel!
     var plusButton: UIButton!
@@ -28,6 +30,7 @@ final class TrackersVC: UIViewController {
         let tracker1 = Tracker(trackerID: UUID(), trackerName: "Считать звезды", color: UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 1.00), emoji: "✨", schedule: ["Saturday"])
         let category1 = TrackerCategory(categoryTitle: "Очень важно", categoryTrackers: [tracker1])
         categories.append(category1)
+        allPossibleCategories = shareAllCategories(categoriesList: categories)
         setupTrackerScreen()
     }
     
@@ -35,6 +38,7 @@ final class TrackersVC: UIViewController {
     private func plusButtonPressed() {
         let modalVC = NewTrackerTypeVC()
         modalVC.delegateLink = self
+        modalVC.delegateListShare = allPossibleCategories
         let navController = UINavigationController(rootViewController: modalVC)
         present(navController, animated: true)
     }
@@ -131,6 +135,10 @@ final class TrackersVC: UIViewController {
         ])
     }
     
+    private func shareAllCategories(categoriesList: [TrackerCategory]) -> [String] {
+        return categoriesList.map { $0.categoryTitle }
+    }
+    
     private func setupWithTrackers() {
         trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         trackerCollection.translatesAutoresizingMaskIntoConstraints = false
@@ -199,6 +207,10 @@ extension TrackersVC: UICollectionViewDelegateFlowLayout {
 }
 
 extension TrackersVC: TrackerSpecsDelegate {
+    func didReceiveCategoriesList(newList: [String]) {
+        allPossibleCategories = newList
+    }
+    
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
         if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
             categories[index].categoryTrackers.append(contentsOf: newTrackerCategory.categoryTrackers)
@@ -211,6 +223,5 @@ extension TrackersVC: TrackerSpecsDelegate {
             trackerCollection.insertSections(IndexSet(integer: sectionIndex))
             //TODO: нужен здесь reloadData?????
         }
-        print(categories)
     }
 }

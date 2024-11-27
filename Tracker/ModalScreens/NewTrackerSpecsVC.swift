@@ -23,7 +23,7 @@ final class NewTrackerSpecsVC: UIViewController {
     var chosenColor: UIColor?
     var chosenEmoji: String?
     var chosenSchedule: [dayOfWeek]?
-    var possibleCategories: [String]? = []
+    var possibleCategories: [String] = []
     
     var previousChosenEmojiCell: EmojiCell?
     var previousChosenColorCell: ColorCell?
@@ -94,9 +94,12 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     private func formNewTracker(chosenCategory: String, chosenTitle: String, chosenColor: UIColor, chosenEmoji: String, chosenSchedule: [String]) {
-            let newTracker = Tracker(trackerID: UUID(), trackerName: chosenTitle, color: chosenColor, emoji: chosenEmoji, schedule: chosenSchedule)
-            let newTrackerCategory = TrackerCategory(categoryTitle: chosenTitle, categoryTrackers: [newTracker])
+        let newTracker = Tracker(trackerID: UUID(), trackerName: chosenTitle, color: chosenColor, emoji: chosenEmoji, schedule: chosenSchedule)
+        let newTrackerCategory = TrackerCategory(categoryTitle: chosenCategory, categoryTrackers: [newTracker])
         delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
+        delegate?.didReceiveCategoriesList(newList: possibleCategories)
+        print(possibleCategories)
+        print(newTrackerCategory)
         dismiss(animated: true, completion: nil)
     }
     
@@ -347,9 +350,7 @@ extension NewTrackerSpecsVC: UITableViewDelegate {
         case "Категория":
             tableView.deselectRow(at: indexPath, animated: true)
             let nextScreen = CategoryListVC()
-            if let possibleCategories {
-                nextScreen.categoryList.append(contentsOf: possibleCategories)
-            }
+            nextScreen.categoryList.append(contentsOf: possibleCategories)
             nextScreen.delegate = self
             if let chosenCategory {
                 nextScreen.categorySelection = chosenCategory
@@ -400,7 +401,11 @@ extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
 
 extension NewTrackerSpecsVC: CategoryDelegateProtocol {
     func didAppendNewCategory(categoryTitle: String) {
-        possibleCategories?.append(categoryTitle)
+        if possibleCategories.contains(where: {$0 == categoryTitle}) {
+            return
+        } else {
+            possibleCategories.append(categoryTitle)
+        }
     }
     
     func didReceiveChosenCategory(categoryTitle: String) {
