@@ -11,6 +11,11 @@ import UIKit
 final class TrackerHeader: UICollectionReusableView {
     
     var headerLabel: UILabel!
+    var headerText: String? {
+        didSet {
+            headerLabel.text = headerText
+        }
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -24,7 +29,7 @@ final class TrackerHeader: UICollectionReusableView {
     private func setupHeaderView() {
         headerLabel = UILabel()
         headerLabel.translatesAutoresizingMaskIntoConstraints = false
-        headerLabel.text = "Нужные дела"
+        headerLabel.text = headerText
         headerLabel.font = UIFont.systemFont(ofSize: 19, weight: .bold)
         addSubview(headerLabel)
         

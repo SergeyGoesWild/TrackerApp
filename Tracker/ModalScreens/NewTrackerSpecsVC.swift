@@ -308,7 +308,6 @@ extension NewTrackerSpecsVC: UICollectionViewDataSource {
     }
 }
 
-
 extension NewTrackerSpecsVC: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 52, height: 52)
@@ -400,7 +399,6 @@ extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
 extension NewTrackerSpecsVC: CategoryDelegateProtocol {
     func didAppendNewCategory(categoryTitle: String) {
         possibleCategories?.append(categoryTitle)
-        print(possibleCategories!)
     }
     
     func didReceiveChosenCategory(categoryTitle: String) {

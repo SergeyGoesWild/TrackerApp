@@ -26,12 +26,8 @@ final class TrackersVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let tracker1 = Tracker(trackerID: UUID(), trackerName: "Считать звезды", color: UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 1.00), emoji: "✨", schedule: ["Saturday"])
-        let tracker2 = Tracker(trackerID: UUID(), trackerName: "Выглядеть классно", color: UIColor(red: 0.99, green: 0.30, blue: 0.29, alpha: 1.00), emoji: "😎", schedule: ["Tuesday", "Friday"])
-        let tracker3 = Tracker(trackerID: UUID(), trackerName: "Смотреть на закат", color: UIColor(red: 0.47, green: 0.58, blue: 0.96, alpha: 1.00), emoji: "🌇", schedule: ["Monday", "Tuesday", "Sunday"])
         let category1 = TrackerCategory(categoryTitle: "Очень важно", categoryTrackers: [tracker1])
         categories.append(category1)
-        let category2 = TrackerCategory(categoryTitle: "Не очень важно", categoryTrackers: [tracker2, tracker3, tracker3])
-        categories.append(category2)
         setupTrackerScreen()
     }
     
@@ -170,6 +166,7 @@ extension TrackersVC: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as! TrackerHeader
+        header.headerText = categories[indexPath.section].categoryTitle
         return header
     }
 }
@@ -214,5 +211,6 @@ extension TrackersVC: TrackerSpecsDelegate {
             trackerCollection.insertSections(IndexSet(integer: sectionIndex))
             //TODO: нужен здесь reloadData?????
         }
+        print(categories)
     }
 }
