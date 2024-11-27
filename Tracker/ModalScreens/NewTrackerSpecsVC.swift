@@ -23,6 +23,7 @@ final class NewTrackerSpecsVC: UIViewController {
     var chosenColor: UIColor?
     var chosenEmoji: String?
     var chosenSchedule: [dayOfWeek]?
+    var possibleCategories: [String]? = []
     
     var previousChosenEmojiCell: EmojiCell?
     var previousChosenColorCell: ColorCell?
@@ -93,12 +94,11 @@ final class NewTrackerSpecsVC: UIViewController {
         dismiss(animated: true, completion: nil)
     }
     
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        print("Text changed to: \(textField.text ?? "")")
+    @objc private func textFieldDidChange(_ textField: UITextField) {
         chosenTitle = textField.text
     }
 
-    @objc func dismissKeyboard() {
+    @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
     
@@ -308,6 +308,9 @@ extension NewTrackerSpecsVC: UITableViewDelegate {
         case "Категория":
             tableView.deselectRow(at: indexPath, animated: true)
             let nextScreen = CategoryListVC()
+            if let possibleCategories {
+                nextScreen.categoryList.append(contentsOf: possibleCategories)
+            }
             nextScreen.delegate = self
             if let chosenCategory {
                 nextScreen.categorySelection = chosenCategory
@@ -356,7 +359,12 @@ extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
 }
 
 extension NewTrackerSpecsVC: CategoryDelegateProtocol {
-    func didReceiveCategory(categoryTitle: String) {
+    func didAppendNewCategory(categoryTitle: String) {
+        possibleCategories?.append(categoryTitle)
+        print(possibleCategories!)
+    }
+    
+    func didReceiveChosenCategory(categoryTitle: String) {
         chosenCategory = categoryTitle
         specsList[0].subtitle = categoryTitle
         //TODO: заменить это на reloadRows

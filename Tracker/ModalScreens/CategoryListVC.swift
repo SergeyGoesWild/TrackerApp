@@ -9,14 +9,15 @@ import Foundation
 import UIKit
     
 protocol CategoryDelegateProtocol: AnyObject {
-    func didReceiveCategory(categoryTitle: String)
+    func didReceiveChosenCategory(categoryTitle: String)
+    func didAppendNewCategory(categoryTitle: String)
 }
 
 final class CategoryListVC: UIViewController {
     
     //TODO: поменять все ссылки делегатов на слабые
     weak var delegate: CategoryDelegateProtocol?
-    let categoriez = ["Важное", "Норм", "Так себе"]
+    var categoryList: [String] = []
     var categorySelection: String?
     
     var categoryTableView: UITableView!
@@ -30,7 +31,9 @@ final class CategoryListVC: UIViewController {
     }
     
     @objc private func addCategoryButtonPressed() {
-        navigationController?.popViewController(animated: true)
+        let nextScreen = NewCategoryVC()
+        nextScreen.delegate = self
+        navigationController?.pushViewController(nextScreen, animated: true)
     }
     
     private func setupEmptyCategoryScreen() {
@@ -58,6 +61,11 @@ final class CategoryListVC: UIViewController {
     }
     
     private func setupNoNEmptyCategoryScreen() {
+        emptyListImage?.removeFromSuperview()
+        emptyListLabel?.removeFromSuperview()
+        emptyListImage = nil
+        emptyListLabel = nil
+        
         categoryTableView = UITableView(frame: .zero, style: .plain)
         categoryTableView.translatesAutoresizingMaskIntoConstraints = false
         categoryTableView.register(UITableViewCell.self, forCellReuseIdentifier: "categoryCell")
@@ -72,7 +80,7 @@ final class CategoryListVC: UIViewController {
             categoryTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             categoryTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             categoryTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            categoryTableView.heightAnchor.constraint(equalToConstant: CGFloat(75*categoriez.count)),
+            categoryTableView.heightAnchor.constraint(equalToConstant: CGFloat(75*categoryList.count)),
         ])
     }
     
@@ -81,7 +89,7 @@ final class CategoryListVC: UIViewController {
         navigationItem.title = "Категория"
         navigationItem.hidesBackButton = true
         
-        if categoriez.isEmpty {
+        if categoryList.isEmpty {
             setupEmptyCategoryScreen()
         } else {
             setupNoNEmptyCategoryScreen()
@@ -112,7 +120,7 @@ extension CategoryListVC: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let categorySelection {
-            let previousCellIndex = categoriez.firstIndex(where: {$0 == categorySelection} )
+            let previousCellIndex = categoryList.firstIndex(where: {$0 == categorySelection} )
             //TODO: избавиться от force unwrap
             let previousCell = tableView.cellForRow(at: IndexPath(row: previousCellIndex!, section: 0))
             previousCell?.accessoryType = .none
@@ -122,7 +130,7 @@ extension CategoryListVC: UITableViewDelegate {
         selectedCell?.accessoryType = .checkmark
         
         guard let stringForDelegate = selectedCell?.textLabel?.text else { return }
-        delegate?.didReceiveCategory(categoryTitle: stringForDelegate)
+        delegate?.didReceiveChosenCategory(categoryTitle: stringForDelegate)
         tableView.deselectRow(at: indexPath, animated: true)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.navigationController?.popViewController(animated: true)
@@ -132,14 +140,14 @@ extension CategoryListVC: UITableViewDelegate {
 
 extension CategoryListVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoriez.count
+        return categoryList.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //TODO: Здесь тоже удалить лишние сепараторы
-        let currentItem = categoriez[indexPath.row]
+        let currentItem = categoryList[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
-        cell.textLabel?.text = categoriez[indexPath.row]
+        cell.textLabel?.text = categoryList[indexPath.row]
         cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         if currentItem == categorySelection {
             cell.accessoryType = .checkmark
@@ -151,3 +159,14 @@ extension CategoryListVC: UITableViewDataSource {
     }
 }
 
+extension CategoryListVC: NewCategoryDelegateProtocol {
+    func didReceiveNewCategory(categoryTitle: String) {
+        categoryList.append(categoryTitle)
+        if categoryList.count == 1 {
+            setupNoNEmptyCategoryScreen()
+        }
+        delegate?.didAppendNewCategory(categoryTitle: categoryTitle)
+        //TODO: сделать список с адаптивной высотой. возможно ключ к этому, это перерисовка экрана, потому что когда меняешь экран, он становится нормальным, тк все перезагружается
+        categoryTableView.reloadData()
+    }
+}
