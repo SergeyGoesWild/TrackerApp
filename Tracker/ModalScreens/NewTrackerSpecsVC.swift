@@ -207,7 +207,7 @@ final class NewTrackerSpecsVC: UIViewController {
             specsScrollView.topAnchor.constraint(equalTo: view.topAnchor),
             specsScrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             specsScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            specsScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            specsScrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             
             specsContainer.topAnchor.constraint(equalTo: specsScrollView.topAnchor),
             specsContainer.leadingAnchor.constraint(equalTo: specsScrollView.leadingAnchor),
@@ -240,11 +240,13 @@ final class NewTrackerSpecsVC: UIViewController {
             createButton.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -20),
             createButton.heightAnchor.constraint(equalToConstant: 60),
             createButton.topAnchor.constraint(equalTo: colorCollection.bottomAnchor),
+            createButton.bottomAnchor.constraint(equalTo: specsContainer.bottomAnchor, constant: -16),
             
             cancelButton.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 20),
             cancelButton.trailingAnchor.constraint(equalTo: specsContainer.centerXAnchor, constant: -4),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
             cancelButton.topAnchor.constraint(equalTo: colorCollection.bottomAnchor),
+            cancelButton.bottomAnchor.constraint(equalTo: specsContainer.bottomAnchor, constant: -16),
         ])
     }
 }
