@@ -28,6 +28,7 @@ final class NewTrackerSpecsVC: UIViewController {
     var previousChosenEmojiCell: EmojiCell?
     var previousChosenColorCell: ColorCell?
     
+    let headerList = ["Emoji", "Цвет"]
     var specsList = [(title: "Категория", subtitle: nil as String?), (title: "Расписание", subtitle: nil as String?)]
     let emojiList = ["🙂", "😻", "🌺", "🐶", "❤", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪",]
     let colorList = [UIColor(red: 0.99, green: 0.30, blue: 0.29, alpha: 1.00),
@@ -228,14 +229,12 @@ final class NewTrackerSpecsVC: UIViewController {
             emojiCollection.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 18),
             emojiCollection.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -18),
             emojiCollection.topAnchor.constraint(equalTo: specsTable.bottomAnchor, constant: 32),
-            //TODO: внизу какой-то странный отступ, нужно поправить
-            emojiCollection.heightAnchor.constraint(equalToConstant: 204),
+            emojiCollection.heightAnchor.constraint(equalToConstant: 204+18),
             
             colorCollection.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 18),
             colorCollection.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -18),
             colorCollection.topAnchor.constraint(equalTo: emojiCollection.bottomAnchor, constant: 16),
-            //TODO: внизу какой-то странный отступ, нужно поправить
-            colorCollection.heightAnchor.constraint(equalToConstant: 204),
+            colorCollection.heightAnchor.constraint(equalToConstant: 204+18),
             
             createButton.leadingAnchor.constraint(equalTo: specsContainer.centerXAnchor, constant: 4),
             createButton.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -20),
@@ -296,12 +295,24 @@ extension NewTrackerSpecsVC: UICollectionViewDataSource {
             return cell!
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        viewForSupplementaryElementOfKind kind: String,
+                        at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: "emojiHeader",
+            for: indexPath) as! EmojiHeader
+        header.labelText = headerList[collectionView.tag - 1]
+        return header
+    }
 }
+
 
 extension NewTrackerSpecsVC: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let cellWidth = (collectionView.bounds.width - 5 * 5) / CGFloat(6)
-        return CGSize(width: cellWidth, height: cellWidth)
+//        let cellWidth = (collectionView.bounds.width - 5 * 5) / CGFloat(6)
+        return CGSize(width: 52, height: 52)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
@@ -313,7 +324,13 @@ extension NewTrackerSpecsVC: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        return UIEdgeInsets(top: 24, left: 0, bottom: 24, right: 0)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 18)
     }
 }
 
