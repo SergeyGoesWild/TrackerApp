@@ -9,11 +9,10 @@ import Foundation
 import UIKit
 
 protocol TrackerSpecsDelegate {
-    var categories: [TrackerCategory] { get set }
-    var trackerCollection: UICollectionView! { get set }
+    func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
 }
 
-final class TrackersVC: UIViewController, TrackerSpecsDelegate {
+final class TrackersVC: UIViewController {
     
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
@@ -199,5 +198,21 @@ extension TrackersVC: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 12, left: 0, bottom: 16, right: 0)
+    }
+}
+
+extension TrackersVC: TrackerSpecsDelegate {
+    func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
+        if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
+            categories[index].categoryTrackers.append(contentsOf: newTrackerCategory.categoryTrackers)
+            let indexPath = IndexPath(item: categories[index].categoryTrackers.count-1, section: index)
+            trackerCollection.insertItems(at: [indexPath])
+        }
+        else {
+            categories.append(newTrackerCategory)
+            let sectionIndex = categories.count - 1
+            trackerCollection.insertSections(IndexSet(integer: sectionIndex))
+            //TODO: нужен здесь reloadData?????
+        }
     }
 }

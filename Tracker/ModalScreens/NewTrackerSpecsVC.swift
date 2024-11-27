@@ -68,26 +68,17 @@ final class NewTrackerSpecsVC: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        view.endEditing(true) // Ensure the keyboard is dismissed when leaving the screen
+        view.endEditing(true)
     }
     
     @objc private func createButtonPressed() {
-
-        guard var delegate = delegate else { return }
-        if let index = delegate.categories.firstIndex(where: { $0.categoryTitle == categoryMock }) {
-            delegate.categories[index].categoryTrackers.append(trackerMock)
-            let indexPath = IndexPath(item: delegate.categories[index].categoryTrackers.count-1, section: index)
-            delegate.trackerCollection.insertItems(at: [indexPath])
-            dismiss(animated: true, completion: nil)
+        if let chosenCategory = chosenCategory,
+           let chosenTitle = chosenTitle,
+           let chosenColor = chosenColor,
+           let chosenEmoji = chosenEmoji,
+           let chosenSchedule = chosenSchedule {
+            formNewTracker(chosenCategory: chosenCategory, chosenTitle: chosenTitle, chosenColor: chosenColor, chosenEmoji: chosenEmoji, chosenSchedule: chosenSchedule.map {$0.engName})
         }
-        else {
-            let trackerToAdd = TrackerCategory(categoryTitle: categoryMock, categoryTrackers: [trackerMock])
-            delegate.categories.append(trackerToAdd)
-            let sectionIndex = delegate.categories.count - 1
-            delegate.trackerCollection.insertSections(IndexSet(integer: sectionIndex))
-            dismiss(animated: true, completion: nil)
-        }
-        print(delegate.categories)
     }
     
     @objc private func cancelButtonPressed() {
@@ -96,11 +87,42 @@ final class NewTrackerSpecsVC: UIViewController {
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
         chosenTitle = textField.text
+        checkTrackerState()
     }
 
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
+    
+    private func formNewTracker(chosenCategory: String, chosenTitle: String, chosenColor: UIColor, chosenEmoji: String, chosenSchedule: [String]) {
+            let newTracker = Tracker(trackerID: UUID(), trackerName: chosenTitle, color: chosenColor, emoji: chosenEmoji, schedule: chosenSchedule)
+            let newTrackerCategory = TrackerCategory(categoryTitle: chosenTitle, categoryTrackers: [newTracker])
+        delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
+        dismiss(animated: true, completion: nil)
+    }
+    
+    private func checkTrackerState() {
+        if let chosenCategory = chosenCategory,
+           let chosenTitle = chosenTitle,
+           let chosenColor = chosenColor,
+           let chosenEmoji = chosenEmoji,
+           let chosenSchedule = chosenSchedule {
+            enableDoneButton()
+        } else {
+            disableDoneButton()
+        }
+    }
+    
+    private func enableDoneButton() {
+        createButton.isEnabled = true
+        createButton.backgroundColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
+    }
+    
+    private func disableDoneButton() {
+        createButton.isEnabled = false
+        createButton.backgroundColor = UIColor(red: 0.68, green: 0.69, blue: 0.71, alpha: 1.00)
+    }
+
     
     private func setupTrackerSpecsView() {
         view.backgroundColor = .white
@@ -241,6 +263,7 @@ extension NewTrackerSpecsVC: UICollectionViewDelegate {
                 cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 1.00)
                 cell.layer.cornerRadius = 16
                 previousChosenEmojiCell = cell
+                checkTrackerState()
             }
         } else {
             if let cell = collectionView.cellForItem(at: indexPath) as? ColorCell {
@@ -253,6 +276,7 @@ extension NewTrackerSpecsVC: UICollectionViewDelegate {
                 cell.layer.borderWidth = 3
                 cell.layer.cornerRadius = 8
                 previousChosenColorCell = cell
+                checkTrackerState()
             }
         }
     }
@@ -355,6 +379,7 @@ extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
         //TODO: заменить это на reloadRows
         specsTable.reloadData()
 //        specsTable.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .automatic)
+        checkTrackerState()
     }
 }
 
@@ -369,5 +394,6 @@ extension NewTrackerSpecsVC: CategoryDelegateProtocol {
         specsList[0].subtitle = categoryTitle
         //TODO: заменить это на reloadRows
         specsTable.reloadData()
+        checkTrackerState()
     }
 }
