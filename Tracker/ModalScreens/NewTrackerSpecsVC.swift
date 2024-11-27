@@ -28,9 +28,6 @@ final class NewTrackerSpecsVC: UIViewController {
     var previousChosenEmojiCell: EmojiCell?
     var previousChosenColorCell: ColorCell?
     
-    let trackerMock = Tracker(trackerID: UUID(), trackerName: "Погладить крысу", color: UIColor(red: 0.40, green: 0.81, blue: 0.21, alpha: 1.00), emoji: "🐀", schedule: ["Monday"])
-    let categoryMock = "Питомцы"
-    
     var specsList = [(title: "Категория", subtitle: nil as String?), (title: "Расписание", subtitle: nil as String?)]
     let emojiList = ["🙂", "😻", "🌺", "🐶", "❤", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪",]
     let colorList = [UIColor(red: 0.99, green: 0.30, blue: 0.29, alpha: 1.00),
@@ -87,6 +84,7 @@ final class NewTrackerSpecsVC: UIViewController {
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
         chosenTitle = textField.text
+        if chosenTitle == "" { chosenTitle = nil }
         checkTrackerState()
     }
 

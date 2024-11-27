@@ -91,12 +91,9 @@ final class ScheduleVC: UIViewController {
         view.addSubview(scheduleTableView)
         
         doneScheduleButton = UIButton(type: .system)
-        print(scheduleSelection.count)
         if scheduleSelection.count > 0 {
-            print("ENABLING")
             enableDoneButton()
         } else {
-            print("DISABLING")
             disableDoneButton()
         }
         doneScheduleButton.setTitle("Готово", for: .normal)
