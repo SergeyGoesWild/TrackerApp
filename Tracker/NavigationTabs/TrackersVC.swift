@@ -85,12 +85,18 @@ final class TrackersVC: UIViewController {
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         view.addSubview(datePicker)
         
-        //TODO: проверить поля у этого элемента, они как будто больше
         searchBar = UISearchBar()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.placeholder = "Поиск"
-        searchBar.sizeToFit()
         searchBar.searchBarStyle = .minimal
+        let textField = searchBar.searchTextField
+        textField.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                textField.leadingAnchor.constraint(equalTo: searchBar.leadingAnchor, constant: 0),
+                textField.trailingAnchor.constraint(equalTo: searchBar.trailingAnchor, constant: 0),
+                textField.heightAnchor.constraint(equalTo: searchBar.heightAnchor, constant: 0),
+                textField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0),
+            ])
         view.addSubview(searchBar)
         
         if categories.isEmpty {
@@ -111,6 +117,7 @@ final class TrackersVC: UIViewController {
             searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
             searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            searchBar.heightAnchor.constraint(equalToConstant: 36),
         ])
     }
     
