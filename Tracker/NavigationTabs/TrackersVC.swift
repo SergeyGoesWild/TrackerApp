@@ -19,6 +19,8 @@ final class TrackersVC: UIViewController {
     var completedTrackers: [TrackerRecord] = []
     var allPossibleCategories: [String] = []
     
+    var starImage: UIImageView!
+    var starTextLabel: UILabel!
     var titleLabel: UILabel!
     var plusButton: UIButton!
     var datePicker: UIDatePicker!
@@ -27,9 +29,9 @@ final class TrackersVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let tracker1 = Tracker(trackerID: UUID(), trackerName: "Считать звезды", color: UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 1.00), emoji: "✨", schedule: ["Saturday"])
-        let category1 = TrackerCategory(categoryTitle: "Очень важно", categoryTrackers: [tracker1])
-        categories.append(category1)
+//        let tracker1 = Tracker(trackerID: UUID(), trackerName: "Считать звезды", color: UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 1.00), emoji: "✨", schedule: ["Saturday"])
+//        let category1 = TrackerCategory(categoryTitle: "Очень важно", categoryTrackers: [tracker1])
+//        categories.append(category1)
         allPossibleCategories = shareAllCategories(categoriesList: categories)
         setupTrackerScreen()
     }
@@ -83,7 +85,6 @@ final class TrackersVC: UIViewController {
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         view.addSubview(datePicker)
         
-        //TODO: насторить звезду по середине видимой части
         //TODO: проверить поля у этого элемента, они как будто больше
         searchBar = UISearchBar()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
@@ -114,12 +115,12 @@ final class TrackersVC: UIViewController {
     }
     
     private func setupNoTrackers() {
-        let starImage = UIImageView()
+        starImage = UIImageView()
         starImage.translatesAutoresizingMaskIntoConstraints = false
         starImage.image = UIImage(named: "StarIcon")
         view.addSubview(starImage)
         
-        let starTextLabel = UILabel()
+        starTextLabel = UILabel()
         starTextLabel.translatesAutoresizingMaskIntoConstraints = false
         starTextLabel.text = "Что будем отслеживать?"
         starTextLabel.font = .systemFont(ofSize: 12, weight: .regular)
@@ -128,8 +129,8 @@ final class TrackersVC: UIViewController {
         view.addSubview(starTextLabel)
         
         NSLayoutConstraint.activate([
-            starImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            starImage.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            starImage.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            starImage.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
             starTextLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             starTextLabel.topAnchor.constraint(equalTo: starImage.bottomAnchor, constant: 8),
         ])
@@ -140,6 +141,11 @@ final class TrackersVC: UIViewController {
     }
     
     private func setupWithTrackers() {
+        starImage?.removeFromSuperview()
+        starTextLabel?.removeFromSuperview()
+        starImage = nil
+        starTextLabel = nil
+        
         trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         trackerCollection.translatesAutoresizingMaskIntoConstraints = false
         trackerCollection.register(TrackerCell.self, forCellWithReuseIdentifier: "OneTracker")
@@ -212,16 +218,21 @@ extension TrackersVC: TrackerSpecsDelegate {
     }
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
-        if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
-            categories[index].categoryTrackers.append(contentsOf: newTrackerCategory.categoryTrackers)
-            let indexPath = IndexPath(item: categories[index].categoryTrackers.count-1, section: index)
-            trackerCollection.insertItems(at: [indexPath])
-        }
-        else {
+        if categories.isEmpty {
+            setupWithTrackers()
             categories.append(newTrackerCategory)
-            let sectionIndex = categories.count - 1
-            trackerCollection.insertSections(IndexSet(integer: sectionIndex))
-            //TODO: нужен здесь reloadData?????
+            trackerCollection.reloadData()
+        } else {
+            if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
+                categories[index].categoryTrackers.append(contentsOf: newTrackerCategory.categoryTrackers)
+                let indexPath = IndexPath(item: categories[index].categoryTrackers.count-1, section: index)
+                trackerCollection.insertItems(at: [indexPath])
+            }
+            else {
+                categories.append(newTrackerCategory)
+                let sectionIndex = categories.count - 1
+                trackerCollection.insertSections(IndexSet(integer: sectionIndex))
+            }
         }
     }
 }
