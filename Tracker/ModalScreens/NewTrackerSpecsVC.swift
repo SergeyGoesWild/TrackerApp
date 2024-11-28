@@ -212,8 +212,6 @@ final class NewTrackerSpecsVC: UIViewController {
         specsTable.translatesAutoresizingMaskIntoConstraints = false
         specsTable.layer.cornerRadius = 16
         specsTable.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
-        specsTable.tableFooterView = UIView(frame: .zero)
-        //TODO: поправить линии сепараторы
         specsContainer.addSubview(specsTable)
         
         emojiCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
@@ -393,7 +391,7 @@ extension NewTrackerSpecsVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let totalHeight = tableView.bounds.height
         let rowHeight = totalHeight / CGFloat(specsList.count)
-        return rowHeight
+        return 75
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -421,18 +419,27 @@ extension NewTrackerSpecsVC: UITableViewDelegate {
             print("Ни один из вариантов")
         }
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        }
+    }
 }
 
 extension NewTrackerSpecsVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return specsList.count
     }
-    //TODO: проверить соответствует ли сабтайтл макету по цвету
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let item = specsList[indexPath.row]
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
         cell.textLabel?.text = item.title
         cell.detailTextLabel?.text = item.subtitle
+        cell.detailTextLabel?.textColor = UIColor(red: 0.68, green: 0.69, blue: 0.71, alpha: 1.00)
         cell.accessoryType = .disclosureIndicator
         cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         return cell

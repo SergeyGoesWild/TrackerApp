@@ -85,7 +85,6 @@ final class ScheduleVC: UIViewController {
         scheduleTableView.register(UITableViewCell.self, forCellReuseIdentifier: "scheduleCell")
         scheduleTableView.layer.cornerRadius = 16
         scheduleTableView.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
-        scheduleTableView.tableFooterView = UIView(frame: .zero)
         scheduleTableView.delegate = self
         scheduleTableView.dataSource = self
         view.addSubview(scheduleTableView)
@@ -121,6 +120,18 @@ extension ScheduleVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        }
+    }
 }
 
 extension ScheduleVC: UITableViewDataSource {
@@ -129,9 +140,8 @@ extension ScheduleVC: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //TODO: Здесь тоже удалить лишние сепараторы
-        let currentItem = daysOfWeek[indexPath.row]
-        
+
+        let currentItem = daysOfWeek[indexPath.row]        
         let cell = tableView.dequeueReusableCell(withIdentifier: "scheduleCell", for: indexPath)
         cell.textLabel?.text = daysOfWeek[indexPath.row].fullName
         cell.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)

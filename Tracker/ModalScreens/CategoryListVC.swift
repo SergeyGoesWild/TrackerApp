@@ -71,7 +71,6 @@ final class CategoryListVC: UIViewController {
         categoryTableView.register(UITableViewCell.self, forCellReuseIdentifier: "categoryCell")
         categoryTableView.layer.cornerRadius = 16
         categoryTableView.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
-        categoryTableView.tableFooterView = UIView(frame: .zero)
         categoryTableView.delegate = self
         categoryTableView.dataSource = self
         view.addSubview(categoryTableView)
@@ -136,6 +135,14 @@ extension CategoryListVC: UITableViewDelegate {
             self.navigationController?.popViewController(animated: true)
         }
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        }
+    }
 }
 
 extension CategoryListVC: UITableViewDataSource {
@@ -144,7 +151,6 @@ extension CategoryListVC: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //TODO: Здесь тоже удалить лишние сепараторы
         let currentItem = categoryList[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
         cell.textLabel?.text = categoryList[indexPath.row]
@@ -154,7 +160,6 @@ extension CategoryListVC: UITableViewDataSource {
         } else {
             cell.accessoryType = .none
         }
-        
         return cell
     }
 }
@@ -166,7 +171,6 @@ extension CategoryListVC: NewCategoryDelegateProtocol {
             setupNoNEmptyCategoryScreen()
         }
         delegate?.didAppendNewCategory(categoryTitle: categoryTitle)
-        //TODO: сделать список с адаптивной высотой. возможно ключ к этому, это перерисовка экрана, потому что когда меняешь экран, он становится нормальным, тк все перезагружается
         categoryTableView.reloadData()
     }
 }
