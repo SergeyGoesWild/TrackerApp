@@ -29,9 +29,6 @@ final class TrackersVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        let tracker1 = Tracker(trackerID: UUID(), trackerName: "Считать звезды", color: UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 1.00), emoji: "✨", schedule: ["Saturday"])
-//        let category1 = TrackerCategory(categoryTitle: "Очень важно", categoryTrackers: [tracker1])
-//        categories.append(category1)
         allPossibleCategories = shareAllCategories(categoriesList: categories)
         setupTrackerScreen()
     }

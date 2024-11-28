@@ -53,12 +53,15 @@ final class NewTrackerSpecsVC: UIViewController {
     var specsScrollView: UIScrollView!
     var specsContainer: UIView!
     var titleTextField: UITextField!
+    var warningLabel: UILabel!
     var specsTable: UITableView!
     var emojiCollection: UICollectionView!
     var colorCollection: UICollectionView!
     var createButton: UIButton!
     var cancelButton: UIButton!
     
+    var specsTableTopConstraint: NSLayoutConstraint!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTrackerSpecsView()
@@ -84,13 +87,44 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
-        chosenTitle = textField.text
-        if chosenTitle == "" { chosenTitle = nil }
-        checkTrackerState()
+        if let text = textField.text {
+            if text.count > 38 {
+                showWarning()
+                let start = text.startIndex
+                let end = text.index(start, offsetBy: 38)
+                let slice = text[start..<end]
+                titleTextField.text = String(slice)
+            } else {
+                hideWarning()
+                chosenTitle = textField.text
+                if chosenTitle == "" { chosenTitle = nil }
+                checkTrackerState()
+            }
+        }
     }
 
     @objc private func dismissKeyboard() {
         view.endEditing(true)
+    }
+    
+    @objc private func clearTextField() {
+        titleTextField.text = ""
+    }
+    
+    private func showWarning() {
+        warningLabel.isHidden = false
+        specsTableTopConstraint.constant = 62
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func hideWarning() {
+        warningLabel.isHidden = true
+        specsTableTopConstraint.constant = 24
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     private func formNewTracker(chosenCategory: String, chosenTitle: String, chosenColor: UIColor, chosenEmoji: String, chosenSchedule: [String]) {
@@ -131,9 +165,6 @@ final class NewTrackerSpecsVC: UIViewController {
         navigationItem.title = newTrackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
         navigationItem.hidesBackButton = true
         
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-//        view.addGestureRecognizer(tapGesture)
-        
         //TODO: может этот кусок кода переделать
         specsList = newTrackerType == .habit ?
         [(title: "Категория", subtitle: nil as String?), (title: "Расписание", subtitle: nil as String?)] :
@@ -147,15 +178,28 @@ final class NewTrackerSpecsVC: UIViewController {
         specsContainer.translatesAutoresizingMaskIntoConstraints = false
         specsScrollView.addSubview(specsContainer)
         
-        //TODO: сделать лимит на кол во символов
         titleTextField = UITextField()
-        titleTextField.translatesAutoresizingMaskIntoConstraints = false
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         titleTextField.layer.cornerRadius = 16
         titleTextField.placeholder = "Введите название трекера"
         titleTextField.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
         titleTextField.font = UIFont.systemFont(ofSize: 17)
+        let clearButton = UIButton(type: .system)
+        clearButton.setImage(UIImage(systemName: "xmark.circle"), for: .normal)
+        clearButton.addTarget(self, action: #selector(clearTextField), for: .touchUpInside)
+        titleTextField.rightView = clearButton
+        titleTextField.clearButtonMode = .whileEditing
+        titleTextField.translatesAutoresizingMaskIntoConstraints = false
         specsContainer.addSubview(titleTextField)
+        
+        warningLabel = UILabel()
+        warningLabel.text = "Ограничение 38 символов"
+        warningLabel.font = .systemFont(ofSize: 17)
+        warningLabel.textAlignment = .center
+        warningLabel.isHidden = true
+        warningLabel.textColor = UIColor(red: 0.96, green: 0.42, blue: 0.42, alpha: 1.00)
+        warningLabel.translatesAutoresizingMaskIntoConstraints = false
+        specsContainer.addSubview(warningLabel)
         
         specsTable = UITableView(frame: .zero, style: .plain)
         specsTable.dataSource = self
@@ -224,9 +268,12 @@ final class NewTrackerSpecsVC: UIViewController {
             titleTextField.topAnchor.constraint(equalTo: specsContainer.safeAreaLayoutGuide.topAnchor, constant: 24),
             titleTextField.heightAnchor.constraint(equalToConstant: 75),
             
+            warningLabel.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 44),
+            warningLabel.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -44),
+            warningLabel.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 8),
+            
             specsTable.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 16),
             specsTable.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -16),
-            specsTable.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 24),
             specsTable.heightAnchor.constraint(equalToConstant: CGFloat(75*specsList.count)),
             
             emojiCollection.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 18),
@@ -251,6 +298,8 @@ final class NewTrackerSpecsVC: UIViewController {
             cancelButton.topAnchor.constraint(equalTo: colorCollection.bottomAnchor),
             cancelButton.bottomAnchor.constraint(equalTo: specsContainer.bottomAnchor, constant: -16),
         ])
+        specsTableTopConstraint = specsTable.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 24)
+        specsTableTopConstraint.isActive = true
     }
 }
 
