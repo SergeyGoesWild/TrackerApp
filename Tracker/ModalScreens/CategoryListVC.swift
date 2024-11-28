@@ -15,7 +15,6 @@ protocol CategoryDelegateProtocol: AnyObject {
 
 final class CategoryListVC: UIViewController {
     
-    //TODO: поменять все ссылки делегатов на слабые
     weak var delegate: CategoryDelegateProtocol?
     var categoryList: [String] = []
     var categorySelection: String?
@@ -24,6 +23,8 @@ final class CategoryListVC: UIViewController {
     var addCategoryButton: UIButton!
     var emptyListImage: UIImageView!
     var emptyListLabel: UILabel!
+    
+    var tableViewHeightConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,15 +72,18 @@ final class CategoryListVC: UIViewController {
         categoryTableView.register(UITableViewCell.self, forCellReuseIdentifier: "categoryCell")
         categoryTableView.layer.cornerRadius = 16
         categoryTableView.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
+        categoryTableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         categoryTableView.delegate = self
         categoryTableView.dataSource = self
         view.addSubview(categoryTableView)
+        
+        tableViewHeightConstraint = categoryTableView.heightAnchor.constraint(equalToConstant: CGFloat(75*categoryList.count))
+        tableViewHeightConstraint.isActive = true
         
         NSLayoutConstraint.activate([
             categoryTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             categoryTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             categoryTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            categoryTableView.heightAnchor.constraint(equalToConstant: CGFloat(75*categoryList.count)),
         ])
     }
     
@@ -120,7 +124,6 @@ extension CategoryListVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let categorySelection {
             let previousCellIndex = categoryList.firstIndex(where: {$0 == categorySelection} )
-            //TODO: избавиться от force unwrap
             let previousCell = tableView.cellForRow(at: IndexPath(row: previousCellIndex!, section: 0))
             previousCell?.accessoryType = .none
         }
@@ -133,14 +136,6 @@ extension CategoryListVC: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.navigationController?.popViewController(animated: true)
-        }
-    }
-    
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row == tableView.numberOfRows(inSection: indexPath.section) - 1 {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
-        } else {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         }
     }
 }
@@ -170,7 +165,8 @@ extension CategoryListVC: NewCategoryDelegateProtocol {
         if categoryList.count == 1 {
             setupNoNEmptyCategoryScreen()
         }
-        delegate?.didAppendNewCategory(categoryTitle: categoryTitle)
         categoryTableView.reloadData()
+        tableViewHeightConstraint.constant = CGFloat(75*categoryList.count)
+        delegate?.didAppendNewCategory(categoryTitle: categoryTitle)
     }
 }

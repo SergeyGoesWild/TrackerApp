@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-protocol CommonSpecsDelegate {
+protocol CommonSpecsDelegate: AnyObject {
     func didChooseEmoji(emojiToShare: String)
     func didChooseColor(colorToShare: UIColor)
 }
@@ -16,7 +16,7 @@ protocol CommonSpecsDelegate {
 final class NewTrackerSpecsVC: UIViewController {
     
     var newTrackerType: trackerTypes?
-    var delegate: TrackerSpecsDelegate?
+    weak var delegate: TrackerSpecsDelegate?
     
     var chosenCategory: String?
     var chosenTitle: String?

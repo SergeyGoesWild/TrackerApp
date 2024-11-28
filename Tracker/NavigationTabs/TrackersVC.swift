@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-protocol TrackerSpecsDelegate {
+protocol TrackerSpecsDelegate: AnyObject {
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
     func didReceiveCategoriesList(newList: [String])
 }

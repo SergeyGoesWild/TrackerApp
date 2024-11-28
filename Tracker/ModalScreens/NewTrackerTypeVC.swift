@@ -17,7 +17,7 @@ final class NewTrackerTypeVC: UIViewController {
     var habitButton: UIButton!
     var eventButton: UIButton!
     
-    var delegateLink: TrackerSpecsDelegate?
+    weak var delegateLink: TrackerSpecsDelegate?
     var delegateListShare: [String]?
     
     override func viewDidLoad() {

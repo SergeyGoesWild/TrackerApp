@@ -14,7 +14,7 @@ protocol NewCategoryDelegateProtocol: AnyObject {
 
 final class NewCategoryVC: UIViewController {
     
-    var delegate: NewCategoryDelegateProtocol?
+    weak var delegate: NewCategoryDelegateProtocol?
     var titleSelection: String = ""
     
     var newCategoryTitle: UITextField!

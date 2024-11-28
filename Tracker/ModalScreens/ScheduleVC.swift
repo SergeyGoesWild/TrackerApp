@@ -15,7 +15,7 @@ struct dayOfWeek {
     let engName: String
 }
 
-protocol ScheduleDelegateProtocol {
+protocol ScheduleDelegateProtocol: AnyObject {
     func didSetSchedule(scheduleArray: [dayOfWeek])
 }
 
@@ -30,7 +30,7 @@ final class ScheduleVC: UIViewController {
                       dayOfWeek(orderInt: 6, fullName: "Воскресенье", shortName: "Вс", engName: "Sunday")]
     
     var scheduleSelection: [dayOfWeek] = []
-    var delegate: ScheduleDelegateProtocol?
+    weak var delegate: ScheduleDelegateProtocol?
     
     var scheduleTableView: UITableView!
     var doneScheduleButton: UIButton!
