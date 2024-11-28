@@ -180,6 +180,7 @@ final class NewTrackerSpecsVC: UIViewController {
         
         titleTextField = UITextField()
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        titleTextField.translatesAutoresizingMaskIntoConstraints = false
         titleTextField.layer.cornerRadius = 16
         titleTextField.placeholder = "Введите название трекера"
         titleTextField.backgroundColor = UIColor(red: 0.90, green: 0.91, blue: 0.92, alpha: 0.30)
@@ -189,7 +190,9 @@ final class NewTrackerSpecsVC: UIViewController {
         clearButton.addTarget(self, action: #selector(clearTextField), for: .touchUpInside)
         titleTextField.rightView = clearButton
         titleTextField.clearButtonMode = .whileEditing
-        titleTextField.translatesAutoresizingMaskIntoConstraints = false
+        let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: titleTextField.frame.height))
+        titleTextField.leftView = leftPaddingView
+        titleTextField.leftViewMode = .always
         specsContainer.addSubview(titleTextField)
         
         warningLabel = UILabel()

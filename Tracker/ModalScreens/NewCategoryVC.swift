@@ -100,6 +100,9 @@ final class NewCategoryVC: UIViewController {
         clearButton.addTarget(self, action: #selector(clearTextField), for: .touchUpInside)
         newCategoryTitle.rightView = clearButton
         newCategoryTitle.clearButtonMode = .whileEditing
+        let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: newCategoryTitle.frame.height))
+        newCategoryTitle.leftView = leftPaddingView
+        newCategoryTitle.leftViewMode = .always
         view.addSubview(newCategoryTitle)
         
         warningLabel = UILabel()

@@ -17,7 +17,6 @@ final class NewTrackerTypeVC: UIViewController {
     var habitButton: UIButton!
     var eventButton: UIButton!
     
-    //TODO: посмотреть так вообще нормально пробрасывать?
     var delegateLink: TrackerSpecsDelegate?
     var delegateListShare: [String]?
     
