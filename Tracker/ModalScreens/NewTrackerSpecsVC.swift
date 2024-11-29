@@ -73,13 +73,12 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     @objc private func createButtonPressed() {
-        if let chosenCategory = chosenCategory,
-           let chosenTitle = chosenTitle,
-           let chosenColor = chosenColor,
-           let chosenEmoji = chosenEmoji,
-           let chosenSchedule = chosenSchedule {
-            formNewTracker(chosenCategory: chosenCategory, chosenTitle: chosenTitle, chosenColor: chosenColor, chosenEmoji: chosenEmoji, chosenSchedule: chosenSchedule.map {$0.engName})
-        }
+            if let chosenCategory = chosenCategory,
+               let chosenTitle = chosenTitle,
+               let chosenColor = chosenColor,
+               let chosenEmoji = chosenEmoji {
+                formNewTracker(chosenCategory: chosenCategory, chosenTitle: chosenTitle, chosenColor: chosenColor, chosenEmoji: chosenEmoji, chosenSchedule: chosenSchedule)
+            }
     }
     
     @objc private func cancelButtonPressed() {
@@ -127,25 +126,34 @@ final class NewTrackerSpecsVC: UIViewController {
         }
     }
     
-    private func formNewTracker(chosenCategory: String, chosenTitle: String, chosenColor: UIColor, chosenEmoji: String, chosenSchedule: [String]) {
-        let newTracker = Tracker(trackerID: UUID(), trackerName: chosenTitle, color: chosenColor, emoji: chosenEmoji, schedule: chosenSchedule)
+    private func formNewTracker(chosenCategory: String, chosenTitle: String, chosenColor: UIColor, chosenEmoji: String, chosenSchedule: [dayOfWeek]?) {
+        let newTracker = Tracker(trackerID: UUID(), trackerName: chosenTitle, color: chosenColor, emoji: chosenEmoji, schedule: chosenSchedule?.map( {$0.engName} ))
         let newTrackerCategory = TrackerCategory(categoryTitle: chosenCategory, categoryTrackers: [newTracker])
         delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
         delegate?.didReceiveCategoriesList(newList: possibleCategories)
-        print(possibleCategories)
-        print(newTrackerCategory)
         dismiss(animated: true, completion: nil)
     }
     
     private func checkTrackerState() {
-        if let chosenCategory = chosenCategory,
-           let chosenTitle = chosenTitle,
-           let chosenColor = chosenColor,
-           let chosenEmoji = chosenEmoji,
-           let chosenSchedule = chosenSchedule {
-            enableDoneButton()
+        if newTrackerType == .habit {
+            if let chosenCategory = chosenCategory,
+               let chosenTitle = chosenTitle,
+               let chosenColor = chosenColor,
+               let chosenEmoji = chosenEmoji,
+               let chosenSchedule = chosenSchedule {
+                enableDoneButton()
+            } else {
+                disableDoneButton()
+            }
         } else {
-            disableDoneButton()
+            if let chosenCategory = chosenCategory,
+               let chosenTitle = chosenTitle,
+               let chosenColor = chosenColor,
+               let chosenEmoji = chosenEmoji {
+                enableDoneButton()
+            } else {
+                disableDoneButton()
+            }
         }
     }
     
@@ -165,7 +173,6 @@ final class NewTrackerSpecsVC: UIViewController {
         navigationItem.title = newTrackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
         navigationItem.hidesBackButton = true
         
-        //TODO: может этот кусок кода переделать
         specsList = newTrackerType == .habit ?
         [(title: "Категория", subtitle: nil as String?), (title: "Расписание", subtitle: nil as String?)] :
         [(title: "Категория", subtitle: nil as String?)]
@@ -262,7 +269,6 @@ final class NewTrackerSpecsVC: UIViewController {
             specsContainer.trailingAnchor.constraint(equalTo: specsScrollView.trailingAnchor),
             specsContainer.bottomAnchor.constraint(equalTo: specsScrollView.bottomAnchor),
             specsContainer.widthAnchor.constraint(equalTo: specsScrollView.widthAnchor),
-            specsContainer.heightAnchor.constraint(greaterThanOrEqualTo: specsScrollView.heightAnchor),
             
             titleTextField.leadingAnchor.constraint(equalTo: specsContainer.leadingAnchor, constant: 16),
             titleTextField.trailingAnchor.constraint(equalTo: specsContainer.trailingAnchor, constant: -16),

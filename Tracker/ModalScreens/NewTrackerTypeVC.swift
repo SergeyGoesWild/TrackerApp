@@ -38,17 +38,10 @@ final class NewTrackerTypeVC: UIViewController {
         let specsVC = NewTrackerSpecsVC()
         specsVC.newTrackerType = .event
         specsVC.delegate = delegateLink
+        guard let delegateListShare else { return }
+        specsVC.possibleCategories.append(contentsOf: delegateListShare)
         navigationController?.pushViewController(specsVC, animated: true)
     }
-    
-//    @objc private func dismissButtonPressed() {
-//            guard let presentingVC = self.presentingViewController else { return }
-//            dismiss(animated: true) {
-//            let specsVC = NewTrackerSpecsVC()
-//            let navController = UINavigationController(rootViewController: specsVC)
-//            presentingVC.present(navController, animated: true)
-//        }
-//    }
     
     private func setupTrackerTypeView() {
         view.backgroundColor = .white

@@ -218,7 +218,8 @@ extension TrackersVC: UICollectionViewDelegateFlowLayout {
 
 extension TrackersVC: TrackerSpecsDelegate {
     func didReceiveCategoriesList(newList: [String]) {
-        allPossibleCategories = newList
+        let newUniqueElements = newList.filter({ !allPossibleCategories.contains($0) })
+        allPossibleCategories.append(contentsOf: newUniqueElements)
     }
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {

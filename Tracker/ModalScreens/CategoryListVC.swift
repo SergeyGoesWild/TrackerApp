@@ -161,12 +161,14 @@ extension CategoryListVC: UITableViewDataSource {
 
 extension CategoryListVC: NewCategoryDelegateProtocol {
     func didReceiveNewCategory(categoryTitle: String) {
-        categoryList.append(categoryTitle)
-        if categoryList.count == 1 {
-            setupNoNEmptyCategoryScreen()
+        if !categoryList.contains(categoryTitle) {
+            categoryList.append(categoryTitle)
+            if categoryList.count == 1 {
+                setupNoNEmptyCategoryScreen()
+            }
+            categoryTableView.reloadData()
+            tableViewHeightConstraint.constant = CGFloat(75*categoryList.count)
+            delegate?.didAppendNewCategory(categoryTitle: categoryTitle)
         }
-        categoryTableView.reloadData()
-        tableViewHeightConstraint.constant = CGFloat(75*categoryList.count)
-        delegate?.didAppendNewCategory(categoryTitle: categoryTitle)
     }
 }
