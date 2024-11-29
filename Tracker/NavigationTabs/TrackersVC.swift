@@ -16,6 +16,7 @@ protocol TrackerSpecsDelegate: AnyObject {
 final class TrackersVC: UIViewController {
     
     var categories: [TrackerCategory] = []
+    var categoriesVisible: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
     var allPossibleCategories: [String] = []
     
@@ -27,10 +28,24 @@ final class TrackersVC: UIViewController {
     var searchBar: UISearchBar!
     var trackerCollection: UICollectionView!
     
+    let tracker1 = Tracker(trackerID: UUID(), trackerName: "Читать книгу", color: UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00), emoji: "🌺", schedule: ["Monday"])
+    let tracker2 = Tracker(trackerID: UUID(), trackerName: "Гладить кота", color: UIColor(red: 0.98, green: 0.83, blue: 0.83, alpha: 1.00), emoji: "😻", schedule: ["Tuesday"])
+    let tracker3 = Tracker(trackerID: UUID(), trackerName: "Сделать салат", color: UIColor(red: 1.00, green: 0.60, blue: 0.80, alpha: 1.00), emoji: "🍔", schedule: ["Sunday"])
+    let tracker4 = Tracker(trackerID: UUID(), trackerName: "Заняться спортом", color: UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00), emoji: "🏓", schedule: ["Friday"])
+    var category1 = TrackerCategory(categoryTitle: "Важные", categoryTrackers: [])
+    var category2 = TrackerCategory(categoryTitle: "Обычные", categoryTrackers: [])
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        category1.categoryTrackers = [tracker1, tracker2]
+        category2.categoryTrackers = [tracker3, tracker4]
+        categories.append(category1)
+        categories.append(category2)
+        categoriesVisible.append(category1)
+        categoriesVisible.append(category2)
         allPossibleCategories = shareAllCategories(categoriesList: categories)
         setupTrackerScreen()
+        filterDateChange()
     }
     
     @objc
@@ -42,12 +57,32 @@ final class TrackersVC: UIViewController {
         present(navController, animated: true)
     }
     
-    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
-        let selectedDate = sender.date
+    @objc private func filterDateChange() {
+        categoriesVisible = []
+        let currentDayOfWeek = getCurrentDayOfWeek()
+        for currentCategory in categories {
+            let filteredTrackers = currentCategory.categoryTrackers.filter { tracker in
+                tracker.schedule?.contains(currentDayOfWeek) == true
+            }
+            if !filteredTrackers.isEmpty {
+                categoriesVisible.append(TrackerCategory(categoryTitle: currentCategory.categoryTitle, categoryTrackers: filteredTrackers))
+            }
+        }
+        print(categoriesVisible)
+        if categoriesVisible.isEmpty {
+            displayEmptyScreen(isActive: true)
+        } else {
+            displayEmptyScreen(isActive: false)
+            trackerCollection.reloadData()
+        }
+    }
+    
+    private func getCurrentDayOfWeek() -> String {
+        let selectedDate = datePicker.date
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd.MM.yyyy" // Формат даты
-        let formattedDate = dateFormatter.string(from: selectedDate)
-        print("Выбранная дата: \(formattedDate)")
+        dateFormatter.dateFormat = "EEEE"
+        let currentDayOfWeek = dateFormatter.string(from: selectedDate)
+        return currentDayOfWeek
     }
     
     private func setupTrackerScreen() {
@@ -79,7 +114,7 @@ final class TrackersVC: UIViewController {
         let maxDate = calendar.date(byAdding: .year, value: 10, to: currentDate)
         datePicker.minimumDate = minDate
         datePicker.maximumDate = maxDate
-        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
+        datePicker.addTarget(self, action: #selector(filterDateChange), for: .valueChanged)
         view.addSubview(datePicker)
         
         searchBar = UISearchBar()
@@ -96,29 +131,14 @@ final class TrackersVC: UIViewController {
             ])
         view.addSubview(searchBar)
         
-        if categories.isEmpty {
-            setupNoTrackers()
-        } else {
-            setupWithTrackers()
-        }
+        trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        trackerCollection.translatesAutoresizingMaskIntoConstraints = false
+        trackerCollection.register(TrackerCell.self, forCellWithReuseIdentifier: "OneTracker")
+        trackerCollection.register(TrackerHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "Header")
+        trackerCollection.dataSource = self
+        trackerCollection.delegate = self
+        view.addSubview(trackerCollection)
         
-        NSLayoutConstraint.activate([
-            plusButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 6),
-            plusButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 1),
-            plusButton.widthAnchor.constraint(equalToConstant: 42),
-            plusButton.heightAnchor.constraint(equalToConstant: 42),
-            datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            datePicker.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44),
-            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
-            searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            searchBar.heightAnchor.constraint(equalToConstant: 36),
-        ])
-    }
-    
-    private func setupNoTrackers() {
         starImage = UIImageView()
         starImage.translatesAutoresizingMaskIntoConstraints = false
         starImage.image = UIImage(named: "StarIcon")
@@ -133,58 +153,64 @@ final class TrackersVC: UIViewController {
         view.addSubview(starTextLabel)
         
         NSLayoutConstraint.activate([
+            plusButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 6),
+            plusButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 1),
+            plusButton.widthAnchor.constraint(equalToConstant: 42),
+            plusButton.heightAnchor.constraint(equalToConstant: 42),
+            
+            datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            datePicker.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44),
+            
+            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
+            searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            searchBar.heightAnchor.constraint(equalToConstant: 36),
+            
+            trackerCollection.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            trackerCollection.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            trackerCollection.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 24),
+            trackerCollection.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
             starImage.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             starImage.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+            
             starTextLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             starTextLabel.topAnchor.constraint(equalTo: starImage.bottomAnchor, constant: 8),
         ])
     }
     
-    private func shareAllCategories(categoriesList: [TrackerCategory]) -> [String] {
-        return categoriesList.map { $0.categoryTitle }
+    private func displayEmptyScreen(isActive: Bool) {
+        starImage.isHidden = !isActive
+        starTextLabel.isHidden = !isActive
+        trackerCollection.isHidden = isActive
     }
     
-    private func setupWithTrackers() {
-        starImage?.removeFromSuperview()
-        starTextLabel?.removeFromSuperview()
-        starImage = nil
-        starTextLabel = nil
-        
-        trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-        trackerCollection.translatesAutoresizingMaskIntoConstraints = false
-        trackerCollection.register(TrackerCell.self, forCellWithReuseIdentifier: "OneTracker")
-        trackerCollection.register(TrackerHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "Header")
-        trackerCollection.dataSource = self
-        trackerCollection.delegate = self
-        view.addSubview(trackerCollection)
-        
-        NSLayoutConstraint.activate([
-            trackerCollection.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            trackerCollection.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            trackerCollection.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 24),
-            trackerCollection.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-        ])
+    private func shareAllCategories(categoriesList: [TrackerCategory]) -> [String] {
+        return categoriesList.map { $0.categoryTitle }
     }
 }
 
 extension TrackersVC: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categories.count
+        return categoriesVisible.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categories[section].categoryTrackers.count
+        return categoriesVisible[section].categoryTrackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
-        cell?.dataModel = categories[indexPath.section].categoryTrackers[indexPath.row]
+        cell?.dataModel = categoriesVisible[indexPath.section].categoryTrackers[indexPath.row]
         return cell!
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as! TrackerHeader
-        header.headerText = categories[indexPath.section].categoryTitle
+        header.headerText = categoriesVisible[indexPath.section].categoryTitle
         return header
     }
 }
@@ -224,7 +250,7 @@ extension TrackersVC: TrackerSpecsDelegate {
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
         if categories.isEmpty {
-            setupWithTrackers()
+            displayEmptyScreen(isActive: false)
             categories.append(newTrackerCategory)
             trackerCollection.reloadData()
         } else {
