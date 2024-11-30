@@ -8,8 +8,26 @@
 import Foundation
 import UIKit
 
+protocol TrackerCellDelegate: AnyObject {
+    func completeTracker(id: UUID, at indexPath: IndexPath)
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath)
+}
+
 final class TrackerCell: UICollectionViewCell {
     
+    weak var delegate: TrackerCellDelegate?
+    var isComplete: Bool? {
+        didSet {
+            guard let isComplete = isComplete else { return }
+            if isComplete {
+                addDayButton.setImage(UIImage(named: "CheckIcon")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
+                addDayButton.backgroundColor?.withAlphaComponent(0.30)
+            } else {
+                addDayButton.setImage(UIImage(named: "PlusIconSVG")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
+                addDayButton.backgroundColor?.withAlphaComponent(1.00)
+            }
+        }
+    }
     var dataModel: Tracker? {
         didSet {
             guard let dataModel = dataModel else { return }
@@ -17,6 +35,12 @@ final class TrackerCell: UICollectionViewCell {
             emojiLabel.text = dataModel.emoji
             titleLabel.text = dataModel.trackerName
             addDayButton.backgroundColor = dataModel.color
+        }
+    }
+    var indexPath: IndexPath?
+    var completeDays: Int? {
+        didSet {
+            dayLabel.text = pluralizeDays(completeDays ?? 0)
         }
     }
     
@@ -49,6 +73,10 @@ final class TrackerCell: UICollectionViewCell {
         emojiCircle.layer.cornerRadius = CGFloat(12)
         contentView.addSubview(emojiCircle)
         
+        emojiCircle.isUserInteractionEnabled = true
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
+        emojiCircle.addGestureRecognizer(tapGesture)
+        
         emojiLabel = UILabel()
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
         emojiLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
@@ -62,7 +90,7 @@ final class TrackerCell: UICollectionViewCell {
         
         dayLabel = UILabel()
         dayLabel.translatesAutoresizingMaskIntoConstraints = false
-        dayLabel.text = getCounterText()
+        dayLabel.text = ""
         dayLabel.font = UIFont.systemFont(ofSize: 12)
         contentView.addSubview(dayLabel)
         
@@ -96,21 +124,24 @@ final class TrackerCell: UICollectionViewCell {
         ])
     }
     
-    //TODO: Написать функцию, которая реагирует на нажатия плюса на трекере
+    @objc private func labelTapped() {
+        print("Label was tapped!")
+        print(isComplete ?? "default")
+    }
+    
     @objc private func addDayPressed() {
-        addDayButton.setImage(UIImage(named: "CheckIcon")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
-        addDayButton.backgroundColor?.withAlphaComponent(0.30)
-        
-        //TODO: работаем с делегатом
+        guard let isComplete = isComplete else { return }
+        guard let indexPath = indexPath else { return }
+        if isComplete {
+            delegate?.uncompleteTracker(id: dataModel!.trackerID, at: indexPath)
+        } else {
+            delegate?.completeTracker(id: dataModel!.trackerID, at: indexPath)
+        }
     }
     
-    //TODO: Написать функцию, которая будет формировать сообщение для счетчика
-    private func getCounterText() -> String {
-        return "\(getCounterDays()) день"
-    }
-    
-    //TODO: Написать функцию, которая будет считать дни для счетчика
-    private func getCounterDays() -> Int {
-        return 1
+    private func pluralizeDays(_ count: Int) -> String {
+        let form = count % 100 > 10 && count % 100 < 20 ? 2 : (count % 10 == 1 ? 0 : (count % 10 >= 2 && count % 10 <= 4 ? 1 : 2))
+        let forms = ["день", "дня", "дней"]
+        return "\(count) \(forms[form])"
     }
 }

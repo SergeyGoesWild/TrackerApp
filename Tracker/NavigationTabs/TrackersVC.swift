@@ -68,7 +68,7 @@ final class TrackersVC: UIViewController {
                 categoriesVisible.append(TrackerCategory(categoryTitle: currentCategory.categoryTitle, categoryTrackers: filteredTrackers))
             }
         }
-        print(categoriesVisible)
+        print(completedTrackers)
         if categoriesVisible.isEmpty {
             displayEmptyScreen(isActive: true)
         } else {
@@ -191,6 +191,11 @@ final class TrackersVC: UIViewController {
     private func shareAllCategories(categoriesList: [TrackerCategory]) -> [String] {
         return categoriesList.map { $0.categoryTitle }
     }
+    
+    private func isTrackerCompleteCurrentDate(id: UUID) -> Bool {
+        let isCompeled = completedTrackers.contains(where: {$0.recordID == id && $0.dateComplete == datePicker.date})
+        return isCompeled
+    }
 }
 
 extension TrackersVC: UICollectionViewDataSource {
@@ -203,8 +208,14 @@ extension TrackersVC: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let currentItem = categoriesVisible[indexPath.section].categoryTrackers[indexPath.row]
+        let completeDays = completedTrackers.filter({ $0.recordID == currentItem.trackerID }).count
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
-        cell?.dataModel = categoriesVisible[indexPath.section].categoryTrackers[indexPath.row]
+        cell?.delegate = self
+        cell?.dataModel = currentItem
+        cell?.indexPath = indexPath
+        cell?.completeDays = completeDays
+        cell?.isComplete = isTrackerCompleteCurrentDate(id: currentItem.trackerID)
         return cell!
     }
     
@@ -252,18 +263,32 @@ extension TrackersVC: TrackerSpecsDelegate {
         if categories.isEmpty {
             displayEmptyScreen(isActive: false)
             categories.append(newTrackerCategory)
-            trackerCollection.reloadData()
         } else {
             if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
                 categories[index].categoryTrackers.append(contentsOf: newTrackerCategory.categoryTrackers)
-                let indexPath = IndexPath(item: categories[index].categoryTrackers.count-1, section: index)
-                trackerCollection.insertItems(at: [indexPath])
             }
             else {
                 categories.append(newTrackerCategory)
-                let sectionIndex = categories.count - 1
-                trackerCollection.insertSections(IndexSet(integer: sectionIndex))
             }
         }
+        filterDateChange()
     }
+}
+
+extension TrackersVC: TrackerCellDelegate {
+    func completeTracker(id: UUID, at indexPath: IndexPath) {
+        print("COMPLETED")
+        completedTrackers.append(TrackerRecord(recordID: id, dateComplete: datePicker.date))
+        print(completedTrackers)
+        trackerCollection.reloadItems(at: [indexPath])
+    }
+    
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
+        print("UN - COMPLETED")
+        completedTrackers.removeAll(where: { $0.recordID == id && $0.dateComplete == datePicker.date})
+        print(completedTrackers)
+        trackerCollection.reloadItems(at: [indexPath])
+    }
+    
+    
 }
