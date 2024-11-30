@@ -245,7 +245,7 @@ extension TrackersVC: TrackerSpecsDelegate {
         if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
             let mergeTrackerArray = categories[index].categoryTrackers + newTrackerCategory.categoryTrackers
             let mergeCategory = TrackerCategory(categoryTitle: newTrackerCategory.categoryTitle, categoryTrackers: mergeTrackerArray)
-            categories.append(mergeCategory)
+            categories[index] = mergeCategory
         }
         else {
             categories.append(newTrackerCategory)
