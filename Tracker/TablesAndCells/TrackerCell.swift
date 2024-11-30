@@ -73,10 +73,6 @@ final class TrackerCell: UICollectionViewCell {
         emojiCircle.layer.cornerRadius = CGFloat(12)
         contentView.addSubview(emojiCircle)
         
-        emojiCircle.isUserInteractionEnabled = true
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
-        emojiCircle.addGestureRecognizer(tapGesture)
-        
         emojiLabel = UILabel()
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
         emojiLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
@@ -122,11 +118,6 @@ final class TrackerCell: UICollectionViewCell {
             addDayButton.widthAnchor.constraint(equalToConstant: 34),
             addDayButton.heightAnchor.constraint(equalToConstant: 34),
         ])
-    }
-    
-    @objc private func labelTapped() {
-        print("Label was tapped!")
-        print(isComplete ?? "default")
     }
     
     @objc private func addDayPressed() {

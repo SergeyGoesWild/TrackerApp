@@ -28,21 +28,21 @@ final class TrackersVC: UIViewController {
     var searchBar: UISearchBar!
     var trackerCollection: UICollectionView!
     
-    let tracker1 = Tracker(trackerID: UUID(), trackerName: "Читать книгу", color: UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00), emoji: "🌺", schedule: ["Monday"])
-    let tracker2 = Tracker(trackerID: UUID(), trackerName: "Гладить кота", color: UIColor(red: 0.98, green: 0.83, blue: 0.83, alpha: 1.00), emoji: "😻", schedule: ["Tuesday"])
-    let tracker3 = Tracker(trackerID: UUID(), trackerName: "Сделать салат", color: UIColor(red: 1.00, green: 0.60, blue: 0.80, alpha: 1.00), emoji: "🍔", schedule: ["Sunday"])
-    let tracker4 = Tracker(trackerID: UUID(), trackerName: "Заняться спортом", color: UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00), emoji: "🏓", schedule: ["Friday"])
-    var category1 = TrackerCategory(categoryTitle: "Важные", categoryTrackers: [])
-    var category2 = TrackerCategory(categoryTitle: "Обычные", categoryTrackers: [])
+//    let tracker1 = Tracker(trackerID: UUID(), trackerName: "Читать книгу", color: UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00), emoji: "🌺", schedule: ["Monday"])
+//    let tracker2 = Tracker(trackerID: UUID(), trackerName: "Гладить кота", color: UIColor(red: 0.98, green: 0.83, blue: 0.83, alpha: 1.00), emoji: "😻", schedule: ["Tuesday"])
+//    let tracker3 = Tracker(trackerID: UUID(), trackerName: "Сделать салат", color: UIColor(red: 1.00, green: 0.60, blue: 0.80, alpha: 1.00), emoji: "🍔", schedule: ["Sunday"])
+//    let tracker4 = Tracker(trackerID: UUID(), trackerName: "Заняться спортом", color: UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00), emoji: "🏓", schedule: ["Friday"])
+//    var category1 = TrackerCategory(categoryTitle: "Важные", categoryTrackers: [])
+//    var category2 = TrackerCategory(categoryTitle: "Обычные", categoryTrackers: [])
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        category1.categoryTrackers = [tracker1, tracker2]
-        category2.categoryTrackers = [tracker3, tracker4]
-        categories.append(category1)
-        categories.append(category2)
-        categoriesVisible.append(category1)
-        categoriesVisible.append(category2)
+//        category1.categoryTrackers = [tracker1, tracker2]
+//        category2.categoryTrackers = [tracker3, tracker4]
+//        categories.append(category1)
+//        categories.append(category2)
+//        categoriesVisible.append(category1)
+//        categoriesVisible.append(category2)
         allPossibleCategories = shareAllCategories(categoriesList: categories)
         setupTrackerScreen()
         filterDateChange()
@@ -68,7 +68,6 @@ final class TrackersVC: UIViewController {
                 categoriesVisible.append(TrackerCategory(categoryTitle: currentCategory.categoryTitle, categoryTrackers: filteredTrackers))
             }
         }
-        print(completedTrackers)
         if categoriesVisible.isEmpty {
             displayEmptyScreen(isActive: true)
         } else {
@@ -226,10 +225,6 @@ extension TrackersVC: UICollectionViewDataSource {
     }
 }
 
-extension TrackersVC: UICollectionViewDelegate {
-    
-}
-
 extension TrackersVC: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let cellWidth = (collectionView.bounds.width - 7) / CGFloat(2)
@@ -277,18 +272,12 @@ extension TrackersVC: TrackerSpecsDelegate {
 
 extension TrackersVC: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
-        print("COMPLETED")
         completedTrackers.append(TrackerRecord(recordID: id, dateComplete: datePicker.date))
-        print(completedTrackers)
         trackerCollection.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        print("UN - COMPLETED")
         completedTrackers.removeAll(where: { $0.recordID == id && $0.dateComplete == datePicker.date})
-        print(completedTrackers)
         trackerCollection.reloadItems(at: [indexPath])
     }
-    
-    
 }
