@@ -136,20 +136,20 @@ final class NewTrackerSpecsVC: UIViewController {
     
     private func checkTrackerState() {
         if newTrackerType == .habit {
-            if let chosenCategory = chosenCategory,
-               let chosenTitle = chosenTitle,
-               let chosenColor = chosenColor,
-               let chosenEmoji = chosenEmoji,
-               let chosenSchedule = chosenSchedule {
+            if let _ = chosenCategory,
+               let _ = chosenTitle,
+               let _ = chosenColor,
+               let _ = chosenEmoji,
+               let _ = chosenSchedule {
                 enableDoneButton()
             } else {
                 disableDoneButton()
             }
         } else {
-            if let chosenCategory = chosenCategory,
-               let chosenTitle = chosenTitle,
-               let chosenColor = chosenColor,
-               let chosenEmoji = chosenEmoji {
+            if let _ = chosenCategory,
+               let _ = chosenTitle,
+               let _ = chosenColor,
+               let _ = chosenEmoji {
                 enableDoneButton()
             } else {
                 disableDoneButton()
@@ -395,8 +395,6 @@ extension NewTrackerSpecsVC: UICollectionViewDelegateFlowLayout {
 
 extension NewTrackerSpecsVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let totalHeight = tableView.bounds.height
-        let rowHeight = totalHeight / CGFloat(specsList.count)
         return 75
     }
     
@@ -455,8 +453,12 @@ extension NewTrackerSpecsVC: UITableViewDataSource {
 extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
     func didSetSchedule(scheduleArray: [dayOfWeek]) {
         chosenSchedule = scheduleArray
-        let stringToSubtitle = scheduleArray.map { $0.shortName }.joined(separator: ", ")
-        specsList[1].subtitle = stringToSubtitle
+        if scheduleArray.count == 7 {
+            specsList[1].subtitle = "Каждый день"
+        } else {
+            let stringToSubtitle = scheduleArray.map { $0.shortName }.joined(separator: ", ")
+            specsList[1].subtitle = stringToSubtitle
+        }
         //TODO: заменить это на reloadRows
         specsTable.reloadData()
 //        specsTable.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .automatic)
