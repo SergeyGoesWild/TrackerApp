@@ -28,21 +28,8 @@ final class TrackersVC: UIViewController {
     var searchBar: UISearchBar!
     var trackerCollection: UICollectionView!
     
-//    let tracker1 = Tracker(trackerID: UUID(), trackerName: "Читать книгу", color: UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00), emoji: "🌺", schedule: ["Monday"])
-//    let tracker2 = Tracker(trackerID: UUID(), trackerName: "Гладить кота", color: UIColor(red: 0.98, green: 0.83, blue: 0.83, alpha: 1.00), emoji: "😻", schedule: ["Tuesday"])
-//    let tracker3 = Tracker(trackerID: UUID(), trackerName: "Сделать салат", color: UIColor(red: 1.00, green: 0.60, blue: 0.80, alpha: 1.00), emoji: "🍔", schedule: ["Sunday"])
-//    let tracker4 = Tracker(trackerID: UUID(), trackerName: "Заняться спортом", color: UIColor(red: 1.00, green: 0.53, blue: 0.12, alpha: 1.00), emoji: "🏓", schedule: ["Friday"])
-//    var category1 = TrackerCategory(categoryTitle: "Важные", categoryTrackers: [])
-//    var category2 = TrackerCategory(categoryTitle: "Обычные", categoryTrackers: [])
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-//        category1.categoryTrackers = [tracker1, tracker2]
-//        category2.categoryTrackers = [tracker3, tracker4]
-//        categories.append(category1)
-//        categories.append(category2)
-//        categoriesVisible.append(category1)
-//        categoriesVisible.append(category2)
         allPossibleCategories = shareAllCategories(categoriesList: categories)
         setupTrackerScreen()
         filterDateChange()
@@ -255,16 +242,13 @@ extension TrackersVC: TrackerSpecsDelegate {
     }
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
-        if categories.isEmpty {
-            displayEmptyScreen(isActive: false)
+        if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
+            let mergeTrackerArray = categories[index].categoryTrackers + newTrackerCategory.categoryTrackers
+            let mergeCategory = TrackerCategory(categoryTitle: newTrackerCategory.categoryTitle, categoryTrackers: mergeTrackerArray)
+            categories.append(mergeCategory)
+        }
+        else {
             categories.append(newTrackerCategory)
-        } else {
-            if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
-                categories[index].categoryTrackers.append(contentsOf: newTrackerCategory.categoryTrackers)
-            }
-            else {
-                categories.append(newTrackerCategory)
-            }
         }
         filterDateChange()
     }
