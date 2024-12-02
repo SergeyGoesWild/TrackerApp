@@ -18,7 +18,8 @@ final class TrackersVC: UIViewController {
     var categories: [TrackerCategory] = []
     var categoriesVisible: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
-    var allPossibleCategories: [String] = []
+    var allPossibleCategories: [String] = ["Важные дела"]
+    var currentDate: Date!
     
     var starImage: UIImageView!
     var starTextLabel: UILabel!
@@ -30,9 +31,9 @@ final class TrackersVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        allPossibleCategories = shareAllCategories(categoriesList: categories)
+        allPossibleCategories.append(contentsOf: shareAllCategories(categoriesList: categories))
         setupTrackerScreen()
-        filterDateChange()
+        dateDidChange()
     }
     
     @objc
@@ -44,9 +45,16 @@ final class TrackersVC: UIViewController {
         present(navController, animated: true)
     }
     
-    @objc private func filterDateChange() {
+    @objc private func dateDidChange() {
+        let dateFromDatePicker = datePicker.date
+        let calendar = Calendar.current
+        currentDate = calendar.startOfDay(for: dateFromDatePicker)
+        filterDateChange()
+    }
+    
+    private func filterDateChange() {
         categoriesVisible = []
-        let currentDayOfWeek = getCurrentDayOfWeek()
+        let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
         for currentCategory in categories {
             let filteredTrackers = currentCategory.categoryTrackers.filter { tracker in
                 tracker.schedule?.contains(currentDayOfWeek) == true
@@ -63,14 +71,13 @@ final class TrackersVC: UIViewController {
         }
     }
     
-    private func getCurrentDayOfWeek() -> String {
-        let selectedDate = datePicker.date
+    private func getCurrentDayOfWeek(date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "EEEE"
-        let currentDayOfWeek = dateFormatter.string(from: selectedDate)
+        let currentDayOfWeek = dateFormatter.string(from: date)
         return currentDayOfWeek
     }
-    
+        
     private func setupTrackerScreen() {
         view.backgroundColor = .white
         
@@ -88,20 +95,18 @@ final class TrackersVC: UIViewController {
         plusButton.setTitle("", for: .normal)
         plusButton.tintColor = UIColor(red: 0.10, green: 0.11, blue: 0.13, alpha: 1.00)
         plusButton.addTarget(self, action: #selector(plusButtonPressed), for: .touchUpInside)
-        view.addSubview(plusButton)
         
         datePicker = UIDatePicker()
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
-        let currentDate = Date()
+        currentDate = Date()
         let calendar = Calendar.current
         let minDate = calendar.date(byAdding: .year, value: -10, to: currentDate)
         let maxDate = calendar.date(byAdding: .year, value: 10, to: currentDate)
         datePicker.minimumDate = minDate
         datePicker.maximumDate = maxDate
-        datePicker.addTarget(self, action: #selector(filterDateChange), for: .valueChanged)
-        view.addSubview(datePicker)
+        datePicker.addTarget(self, action: #selector(dateDidChange), for: .valueChanged)
         
         searchBar = UISearchBar()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
@@ -138,17 +143,14 @@ final class TrackersVC: UIViewController {
         starTextLabel.textAlignment = .center
         view.addSubview(starTextLabel)
         
+        navigationController?.setNavigationBarHidden(false, animated: true)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: plusButton)
+        
         NSLayoutConstraint.activate([
-            plusButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 6),
-            plusButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 1),
-            plusButton.widthAnchor.constraint(equalToConstant: 42),
-            plusButton.heightAnchor.constraint(equalToConstant: 42),
-            
-            datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            datePicker.centerYAnchor.constraint(equalTo: plusButton.centerYAnchor),
             
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 44),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 1),
             
             searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
             searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
@@ -179,7 +181,7 @@ final class TrackersVC: UIViewController {
     }
     
     private func isTrackerCompleteCurrentDate(id: UUID) -> Bool {
-        let isCompeled = completedTrackers.contains(where: {$0.recordID == id && $0.dateComplete == datePicker.date})
+        let isCompeled = completedTrackers.contains(where: {$0.recordID == id && $0.dateComplete == currentDate})
         return isCompeled
     }
 }
@@ -199,6 +201,7 @@ extension TrackersVC: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
         cell?.delegate = self
         cell?.dataModel = currentItem
+        cell?.currentDate = currentDate
         cell?.indexPath = indexPath
         cell?.completeDays = completeDays
         cell?.isComplete = isTrackerCompleteCurrentDate(id: currentItem.trackerID)
@@ -256,12 +259,12 @@ extension TrackersVC: TrackerSpecsDelegate {
 
 extension TrackersVC: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.append(TrackerRecord(recordID: id, dateComplete: datePicker.date))
+        completedTrackers.append(TrackerRecord(recordID: id, dateComplete: currentDate))
         trackerCollection.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.removeAll(where: { $0.recordID == id && $0.dateComplete == datePicker.date})
+        completedTrackers.removeAll(where: { $0.recordID == id && $0.dateComplete == currentDate})
         trackerCollection.reloadItems(at: [indexPath])
     }
 }

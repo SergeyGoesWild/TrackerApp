@@ -21,13 +21,12 @@ final class TrackerCell: UICollectionViewCell {
             guard let isComplete = isComplete else { return }
             if isComplete {
                 addDayButton.setImage(UIImage(named: "CheckIcon")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
-                addDayButton.backgroundColor?.withAlphaComponent(0.30)
             } else {
                 addDayButton.setImage(UIImage(named: "PlusIconSVG")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
-                addDayButton.backgroundColor?.withAlphaComponent(1.00)
             }
         }
     }
+    
     var dataModel: Tracker? {
         didSet {
             guard let dataModel = dataModel else { return }
@@ -37,13 +36,21 @@ final class TrackerCell: UICollectionViewCell {
             addDayButton.backgroundColor = dataModel.color
         }
     }
-    var indexPath: IndexPath?
+    var currentDate: Date? {
+        didSet {
+            let isNotActive: Bool = getCleanDate(date: currentDate!) > getCleanDate(date: Date())
+            addDayButton.isEnabled = !isNotActive
+            addDayButton.backgroundColor = dataModel!.color.withAlphaComponent(isNotActive ? 0.3 : 1.0)
+        }
+    }
+    
     var completeDays: Int? {
         didSet {
             dayLabel.text = pluralizeDays(completeDays ?? 0)
         }
     }
     
+    var indexPath: IndexPath?
     var coloredBackground: UIView!
     var emojiCircle: UIView!
     var emojiLabel: UILabel!
@@ -58,6 +65,12 @@ final class TrackerCell: UICollectionViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func getCleanDate(date: Date) -> Date {
+        let calendar = Calendar.current
+        let dateOnly = calendar.startOfDay(for: date)
+        return dateOnly
     }
     
     private func setupTrackerView() {

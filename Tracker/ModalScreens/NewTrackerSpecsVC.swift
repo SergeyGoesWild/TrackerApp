@@ -18,12 +18,13 @@ final class NewTrackerSpecsVC: UIViewController {
     var newTrackerType: trackerTypes?
     weak var delegate: TrackerSpecsDelegate?
     
-    var chosenCategory: String?
+    var chosenCategory: String!
     var chosenTitle: String?
     var chosenColor: UIColor?
     var chosenEmoji: String?
     var chosenSchedule: [dayOfWeek]?
     var possibleCategories: [String] = []
+    var defaultCategory = "Важные дела"
     
     var previousChosenEmojiCell: EmojiCell?
     var previousChosenColorCell: ColorCell?
@@ -64,6 +65,7 @@ final class NewTrackerSpecsVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupDefaultData()
         setupTrackerSpecsView()
     }
     
@@ -72,9 +74,15 @@ final class NewTrackerSpecsVC: UIViewController {
         view.endEditing(true)
     }
     
+    private func setupDefaultData() {
+        specsList = newTrackerType == .habit ?
+        [(title: "Категория", subtitle: defaultCategory), (title: "Расписание", subtitle: nil as String?)] :
+        [(title: "Категория", subtitle: defaultCategory)]
+        chosenCategory = defaultCategory
+    }
+    
     @objc private func createButtonPressed() {
-            if let chosenCategory = chosenCategory,
-               let chosenTitle = chosenTitle,
+            if let chosenTitle = chosenTitle,
                let chosenColor = chosenColor,
                let chosenEmoji = chosenEmoji {
                 formNewTracker(chosenCategory: chosenCategory, chosenTitle: chosenTitle, chosenColor: chosenColor, chosenEmoji: chosenEmoji, chosenSchedule: chosenSchedule)
@@ -136,8 +144,7 @@ final class NewTrackerSpecsVC: UIViewController {
     
     private func checkTrackerState() {
         if newTrackerType == .habit {
-            if let _ = chosenCategory,
-               let _ = chosenTitle,
+            if let _ = chosenTitle,
                let _ = chosenColor,
                let _ = chosenEmoji,
                let _ = chosenSchedule {
@@ -146,8 +153,7 @@ final class NewTrackerSpecsVC: UIViewController {
                 disableDoneButton()
             }
         } else {
-            if let _ = chosenCategory,
-               let _ = chosenTitle,
+            if let _ = chosenTitle,
                let _ = chosenColor,
                let _ = chosenEmoji {
                 enableDoneButton()
@@ -172,10 +178,6 @@ final class NewTrackerSpecsVC: UIViewController {
         view.backgroundColor = .white
         navigationItem.title = newTrackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
         navigationItem.hidesBackButton = true
-        
-        specsList = newTrackerType == .habit ?
-        [(title: "Категория", subtitle: nil as String?), (title: "Расписание", subtitle: nil as String?)] :
-        [(title: "Категория", subtitle: nil as String?)]
         
         specsScrollView = UIScrollView()
         specsScrollView.translatesAutoresizingMaskIntoConstraints = false
