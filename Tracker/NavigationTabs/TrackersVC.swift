@@ -205,13 +205,13 @@ extension TrackersVC: UICollectionViewDataSource {
         cell?.indexPath = indexPath
         cell?.completeDays = completeDays
         cell?.isComplete = isTrackerCompleteCurrentDate(id: currentItem.trackerID)
-        return cell!
+        return cell ?? UICollectionViewCell()
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as! TrackerHeader
-        header.headerText = categoriesVisible[indexPath.section].categoryTitle
-        return header
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as? TrackerHeader
+        header?.headerText = categoriesVisible[indexPath.section].categoryTitle
+        return header ?? UICollectionReusableView()
     }
 }
 

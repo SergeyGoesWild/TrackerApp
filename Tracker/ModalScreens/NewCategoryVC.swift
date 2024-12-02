@@ -16,6 +16,7 @@ final class NewCategoryVC: UIViewController {
     
     weak var delegate: NewCategoryDelegateProtocol?
     var titleSelection: String = ""
+    let symbolLimit = 38
     
     var newCategoryTitle: UITextField!
     var newCategoryDoneButton: UIButton!
@@ -33,10 +34,10 @@ final class NewCategoryVC: UIViewController {
     
     @objc func textFieldDidChange(_ textField: UITextField) {
         if let text = textField.text {
-            if text.count > 38 {
+            if text.count > symbolLimit {
                 showWarning()
                 let start = text.startIndex
-                let end = text.index(start, offsetBy: 38)
+                let end = text.index(start, offsetBy: symbolLimit)
                 let slice = text[start..<end]
                 newCategoryTitle.text = String(slice)
             } else {
@@ -106,7 +107,7 @@ final class NewCategoryVC: UIViewController {
         view.addSubview(newCategoryTitle)
         
         warningLabel = UILabel()
-        warningLabel.text = "Ограничение 38 символов"
+        warningLabel.text = "Ограничение \(symbolLimit) символов"
         warningLabel.font = .systemFont(ofSize: 17)
         warningLabel.textAlignment = .center
         warningLabel.isHidden = true

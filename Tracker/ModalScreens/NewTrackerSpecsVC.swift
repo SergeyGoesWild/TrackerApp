@@ -24,7 +24,8 @@ final class NewTrackerSpecsVC: UIViewController {
     var chosenEmoji: String?
     var chosenSchedule: [dayOfWeek]?
     var possibleCategories: [String] = []
-    var defaultCategory = "Важные дела"
+    let defaultCategory = "Важные дела"
+    let symbolLimit = 38
     
     var previousChosenEmojiCell: EmojiCell?
     var previousChosenColorCell: ColorCell?
@@ -62,7 +63,7 @@ final class NewTrackerSpecsVC: UIViewController {
     var cancelButton: UIButton!
     
     var specsTableTopConstraint: NSLayoutConstraint!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupDefaultData()
@@ -82,11 +83,11 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     @objc private func createButtonPressed() {
-            if let chosenTitle = chosenTitle,
-               let chosenColor = chosenColor,
-               let chosenEmoji = chosenEmoji {
-                formNewTracker(chosenCategory: chosenCategory, chosenTitle: chosenTitle, chosenColor: chosenColor, chosenEmoji: chosenEmoji, chosenSchedule: chosenSchedule)
-            }
+        if let chosenTitle = chosenTitle,
+           let chosenColor = chosenColor,
+           let chosenEmoji = chosenEmoji {
+            formNewTracker(chosenCategory: chosenCategory, chosenTitle: chosenTitle, chosenColor: chosenColor, chosenEmoji: chosenEmoji, chosenSchedule: chosenSchedule)
+        }
     }
     
     @objc private func cancelButtonPressed() {
@@ -95,10 +96,10 @@ final class NewTrackerSpecsVC: UIViewController {
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
         if let text = textField.text {
-            if text.count > 38 {
+            if text.count > symbolLimit {
                 showWarning()
                 let start = text.startIndex
-                let end = text.index(start, offsetBy: 38)
+                let end = text.index(start, offsetBy: symbolLimit)
                 let slice = text[start..<end]
                 titleTextField.text = String(slice)
             } else {
@@ -109,7 +110,7 @@ final class NewTrackerSpecsVC: UIViewController {
             }
         }
     }
-
+    
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
@@ -172,7 +173,7 @@ final class NewTrackerSpecsVC: UIViewController {
         createButton.isEnabled = false
         createButton.backgroundColor = UIColor(red: 0.68, green: 0.69, blue: 0.71, alpha: 1.00)
     }
-
+    
     
     private func setupTrackerSpecsView() {
         view.backgroundColor = .white
@@ -205,7 +206,7 @@ final class NewTrackerSpecsVC: UIViewController {
         specsContainer.addSubview(titleTextField)
         
         warningLabel = UILabel()
-        warningLabel.text = "Ограничение 38 символов"
+        warningLabel.text = "Ограничение \(symbolLimit) символов"
         warningLabel.font = .systemFont(ofSize: 17)
         warningLabel.textAlignment = .center
         warningLabel.isHidden = true
@@ -351,11 +352,11 @@ extension NewTrackerSpecsVC: UICollectionViewDataSource {
         if collectionView.tag == 1 {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "emojiCell", for: indexPath) as? EmojiCell
             cell?.emojiCellLabel.text = emojiList[indexPath.row]
-            return cell!
+            return cell ?? UICollectionViewCell()
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "colorCell", for: indexPath) as? ColorCell
             cell?.colorView.backgroundColor = colorList[indexPath.row]
-            return cell!
+            return cell ?? UICollectionViewCell()
         }
     }
     
@@ -365,9 +366,9 @@ extension NewTrackerSpecsVC: UICollectionViewDataSource {
         let header = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
             withReuseIdentifier: "newTrackerHeader",
-            for: indexPath) as! NewTrackerHeader
-        header.labelText = headerList[collectionView.tag - 1]
-        return header
+            for: indexPath) as? NewTrackerHeader
+        header?.labelText = headerList[collectionView.tag - 1]
+        return header ?? UICollectionReusableView()
     }
 }
 
@@ -463,7 +464,7 @@ extension NewTrackerSpecsVC: ScheduleDelegateProtocol {
         }
         //TODO: заменить это на reloadRows
         specsTable.reloadData()
-//        specsTable.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .automatic)
+        //        specsTable.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .automatic)
         checkTrackerState()
     }
 }
