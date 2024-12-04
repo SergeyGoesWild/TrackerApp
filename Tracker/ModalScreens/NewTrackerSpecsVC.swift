@@ -333,7 +333,7 @@ extension NewTrackerSpecsVC: UICollectionViewDelegate {
                     previousChosenColorCell.layer.borderWidth = 0
                 }
                 chosenColor = cell.colorView.backgroundColor
-                cell.layer.borderColor = UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 0.30).cgColor
+                cell.layer.borderColor = chosenColor?.cgColor
                 cell.layer.borderWidth = 3
                 cell.layer.cornerRadius = 8
                 previousChosenColorCell = cell
