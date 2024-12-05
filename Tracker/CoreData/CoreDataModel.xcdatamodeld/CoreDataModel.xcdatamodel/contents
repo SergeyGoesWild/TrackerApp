@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22758" systemVersion="23E214" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="ScheduleUnit" representedClassName="ScheduleUnit" syncable="YES" codeGenerationType="class">
+        <attribute name="value" optional="YES" attributeType="String"/>
+        <relationship name="tracker" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCoreData" inverseName="schedule" inverseEntity="TrackerCoreData"/>
+    </entity>
+    <entity name="TrackerCategoryCoreData" representedClassName="TrackerCategoryCoreData" syncable="YES" codeGenerationType="class">
+        <attribute name="categoryTitle" optional="YES" attributeType="String"/>
+        <relationship name="categoryTrackers" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCoreData" inverseName="category" inverseEntity="TrackerCoreData"/>
+    </entity>
+    <entity name="TrackerCoreData" representedClassName="TrackerCoreData" syncable="YES" codeGenerationType="class">
+        <attribute name="color" optional="YES" attributeType="String"/>
+        <attribute name="emoji" optional="YES" attributeType="String"/>
+        <attribute name="trackerID" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="trackerName" optional="YES" attributeType="String"/>
+        <relationship name="category" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCategoryCoreData" inverseName="categoryTrackers" inverseEntity="TrackerCategoryCoreData"/>
+        <relationship name="record" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerRecordCoreData" inverseName="trackerID" inverseEntity="TrackerRecordCoreData"/>
+        <relationship name="schedule" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ScheduleUnit" inverseName="tracker" inverseEntity="ScheduleUnit"/>
+    </entity>
+    <entity name="TrackerRecordCoreData" representedClassName="TrackerRecordCoreData" syncable="YES" codeGenerationType="class">
+        <attribute name="dateComplete" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="trackerID" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCoreData" inverseName="record" inverseEntity="TrackerCoreData"/>
+    </entity>
+</model>
