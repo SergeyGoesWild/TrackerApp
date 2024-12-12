@@ -136,10 +136,15 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     private func formNewTracker(chosenCategory: String, chosenTitle: String, chosenColor: UIColor, chosenEmoji: String, chosenSchedule: [dayOfWeek]?) {
+        
         let newTracker = Tracker(trackerID: UUID(), trackerName: chosenTitle, color: chosenColor, emoji: chosenEmoji, schedule: chosenSchedule?.map( {$0.engName} ))
-        let newTrackerCategory = TrackerCategory(categoryTitle: chosenCategory, categoryTrackers: [newTracker])
-        delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
-        delegate?.didReceiveCategoriesList(newList: possibleCategories)
+        
+        let trackerCategoryStore = TrackerCategoryStore()
+        trackerCategoryStore.updateTrackerCategory(title: "Срочно", newTracker: newTracker)
+        
+//        let newTrackerCategory = TrackerCategory(categoryTitle: chosenCategory, categoryTrackers: [newTracker])
+//        delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
+//        delegate?.didReceiveCategoriesList(newList: possibleCategories)
         dismiss(animated: true, completion: nil)
     }
     

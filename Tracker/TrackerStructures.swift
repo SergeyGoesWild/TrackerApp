@@ -25,3 +25,16 @@ struct TrackerRecord {
     let recordID: UUID
     let dateComplete: Date
 }
+
+extension TrackerCoreData {
+    var toTracker: Tracker {
+        Tracker(trackerID: trackerID ?? UUID(), trackerName: trackerName ?? "name default", color: UIColorMarshalling().color(from: color ?? ""), emoji: emoji ?? "emoji", schedule: nil)
+    }
+}
+
+extension TrackerCategoryCoreData {
+    var toCategory: TrackerCategory {
+        let theTrackers = Array(trackers as! Set<TrackerCoreData>).map({ $0.toTracker })
+        return TrackerCategory(categoryTitle: categoryTitle ?? "By default", categoryTrackers: theTrackers)
+    }
+}

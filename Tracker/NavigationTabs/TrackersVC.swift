@@ -31,9 +31,15 @@ final class TrackersVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let trackerCategoryStore = TrackerCategoryStore()
+        //trackerCategoryStore.createTrackerCategory(categoryTitle: "Срочно")
+        let trackerCategory = trackerCategoryStore.fetchTrackerCategory(by: "Срочно")!.toCategory
+        categoriesVisible.append(trackerCategory)
+        
         allPossibleCategories.append(contentsOf: shareAllCategories(categoriesList: categories))
         setupTrackerScreen()
-        dateDidChange()
+        //dateDidChange()
     }
     
     @objc
