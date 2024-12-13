@@ -49,6 +49,12 @@ final class TrackerCategoryStore {
         }
     }
     
+    func convertToCategory(_ trackerCategoryCD: TrackerCategoryCoreData) -> TrackerCategory {
+        let convertedTrackers = Array(trackerCategoryCD.trackers as! Set<TrackerCoreData>).map({ $0.toTracker })
+        let newCategory = TrackerCategory(categoryTitle: trackerCategoryCD.categoryTitle ?? "default", categoryTrackers: convertedTrackers)
+        return newCategory
+    }
+    
     private func saveContext() {
         if context.hasChanges {
             do {

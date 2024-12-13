@@ -28,6 +28,13 @@ final class TrackerStore {
         newTracker.trackerName = tracker.trackerName
         newTracker.emoji = tracker.emoji
         newTracker.color = uiColorMarshalling.hexString(from: tracker.color)
+        if let schedule = tracker.schedule {
+            for unitString in schedule {
+                let scheduleUnit = ScheduleUnit(context: context)
+                scheduleUnit.value = unitString
+                scheduleUnit.tracker = newTracker
+            }
+        }
         saveContext()
         return newTracker
     }
@@ -43,6 +50,16 @@ final class TrackerStore {
             print("Ошибка при получении трекера по ID: \(error)")
             return nil
         }
+    }
+    
+    func convertToTracker(_ trackerCD: TrackerCoreData) -> Tracker {
+        let newSchedule = Array(trackerCD.schedule as! Set<ScheduleUnit>).compactMap({ $0.value })
+        let newTracker = Tracker(trackerID: trackerCD.trackerID ?? UUID(),
+                                 trackerName: trackerCD.trackerName ?? "default",
+                                 color: uiColorMarshalling.color(from: trackerCD.color ?? "#1273DE"),
+                                 emoji: trackerCD.emoji ?? "x",
+                                 schedule: newSchedule)
+        return newTracker
     }
     
     private func saveContext() {

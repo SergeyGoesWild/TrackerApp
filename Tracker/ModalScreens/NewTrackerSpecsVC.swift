@@ -139,8 +139,8 @@ final class NewTrackerSpecsVC: UIViewController {
         
         let newTracker = Tracker(trackerID: UUID(), trackerName: chosenTitle, color: chosenColor, emoji: chosenEmoji, schedule: chosenSchedule?.map( {$0.engName} ))
         
-        let trackerCategoryStore = TrackerCategoryStore()
-        trackerCategoryStore.updateTrackerCategory(title: "Срочно", newTracker: newTracker)
+//        let trackerCategoryStore = TrackerCategoryStore()
+//        trackerCategoryStore.updateTrackerCategory(title: "Срочно", newTracker: newTracker)
         
 //        let newTrackerCategory = TrackerCategory(categoryTitle: chosenCategory, categoryTrackers: [newTracker])
 //        delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
