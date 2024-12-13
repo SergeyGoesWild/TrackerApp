@@ -49,6 +49,19 @@ final class TrackerRecordStore {
         }
     }
     
+    func getCompleteDays(_ id: UUID) -> Int {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "trackerID == %@", id as CVarArg)
+        
+        do {
+            let count = try context.count(for: fetchRequest)
+            return count
+        } catch {
+            print(error)
+            return 0
+        }
+    }
+    
     func deleteRecord(withID id: UUID) throws {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "trackerID == %@", id as CVarArg)

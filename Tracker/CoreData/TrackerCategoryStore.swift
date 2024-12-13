@@ -16,7 +16,7 @@ final class TrackerCategoryStore {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         self.init(context: context, trackerStore: TrackerStore(context: context))
     }
-
+    
     init(context: NSManagedObjectContext, trackerStore: TrackerStore) {
         self.context = context
         self.trackerStore = trackerStore
@@ -40,7 +40,7 @@ final class TrackerCategoryStore {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "categoryTitle == %@", title as CVarArg)
         fetchRequest.fetchLimit = 1
-
+        
         do {
             return try context.fetch(fetchRequest).first
         } catch {
@@ -49,10 +49,52 @@ final class TrackerCategoryStore {
         }
     }
     
-    func convertToCategory(_ trackerCategoryCD: TrackerCategoryCoreData) -> TrackerCategory {
-        let convertedTrackers = Array(trackerCategoryCD.trackers as! Set<TrackerCoreData>).map({ $0.toTracker })
-        let newCategory = TrackerCategory(categoryTitle: trackerCategoryCD.categoryTitle ?? "default", categoryTrackers: convertedTrackers)
-        return newCategory
+    func fetchTrackerCategoryForDay(by dayOfWeek: String) -> [TrackerCategoryCoreData] {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        
+        do {
+            let allCategories = try context.fetch(fetchRequest)
+            var filteredCategories: [TrackerCategoryCoreData] = []
+            
+            for currentCategory in allCategories {
+                // Safely access the trackers relationship
+                if let trackers = currentCategory.trackers as? Set<TrackerCoreData> {
+                    // Filter the trackers that match the criteria
+                    let matchingTrackers = trackers.filter { tracker in
+                        if let scheduleUnits = tracker.schedule as? Set<ScheduleUnit> {
+                            return scheduleUnits.contains { $0.value == dayOfWeek }
+                        }
+                        return false
+                    }
+                    
+                    // Only include the category if there are matching trackers
+                    if !matchingTrackers.isEmpty {
+                        // Replace the current category's trackers with only the matching trackers
+                        currentCategory.trackers = NSSet(set: matchingTrackers)
+                        filteredCategories.append(currentCategory)
+                    }
+                }
+            }
+            return filteredCategories
+            
+        } catch {
+            print("Ошибка при получении категории: \(error)")
+            return []
+        }
+    }
+    
+    func convertToCategory(_ trackerCategoryCD: [TrackerCategoryCoreData]) -> [TrackerCategory] {
+        var convertedCategory: [TrackerCategory] = []
+        trackerCategoryCD.forEach { trackerCategory in
+            let convertedTrackers = Array(trackerCategory.trackers as! Set<TrackerCoreData>).map { trackerCoreData in
+                // Use the TrackerStore method to convert TrackerCoreData to Tracker
+                return trackerStore.convertToTracker(trackerCoreData)
+            }
+            let newCategory = TrackerCategory(categoryTitle: trackerCategory.categoryTitle ?? "default", categoryTrackers: convertedTrackers)
+            convertedCategory.append(newCategory)
+        }
+        
+        return convertedCategory
     }
     
     private func saveContext() {
