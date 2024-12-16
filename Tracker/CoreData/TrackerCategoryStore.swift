@@ -36,6 +36,24 @@ final class TrackerCategoryStore {
         }
     }
     
+    func getAllPossibleTitles() -> [String] {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        
+        do {
+            let allCategories = try context.fetch(fetchRequest)
+            var allPossibleTitles: [String] = []
+            for category in allCategories {
+                if let title = category.categoryTitle {
+                    allPossibleTitles.append(title)
+                }
+            }
+            return allPossibleTitles
+        } catch {
+            print("Ошибка при получении категории: \(error)")
+            return []
+        }
+    }
+    
     func fetchTrackerCategory(by title: String) -> TrackerCategoryCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "categoryTitle == %@", title as CVarArg)
@@ -57,19 +75,14 @@ final class TrackerCategoryStore {
             var filteredCategories: [TrackerCategoryCoreData] = []
             
             for currentCategory in allCategories {
-                // Safely access the trackers relationship
                 if let trackers = currentCategory.trackers as? Set<TrackerCoreData> {
-                    // Filter the trackers that match the criteria
                     let matchingTrackers = trackers.filter { tracker in
                         if let scheduleUnits = tracker.schedule as? Set<ScheduleUnit> {
                             return scheduleUnits.contains { $0.value == dayOfWeek }
                         }
                         return false
                     }
-                    
-                    // Only include the category if there are matching trackers
                     if !matchingTrackers.isEmpty {
-                        // Replace the current category's trackers with only the matching trackers
                         currentCategory.trackers = NSSet(set: matchingTrackers)
                         filteredCategories.append(currentCategory)
                     }
@@ -102,7 +115,6 @@ final class TrackerCategoryStore {
         var convertedCategory: [TrackerCategory] = []
         trackerCategoryCD.forEach { trackerCategory in
             let convertedTrackers = Array(trackerCategory.trackers as! Set<TrackerCoreData>).map { trackerCoreData in
-                // Use the TrackerStore method to convert TrackerCoreData to Tracker
                 return trackerStore.convertToTracker(trackerCoreData)
             }
             let newCategory = TrackerCategory(categoryTitle: trackerCategory.categoryTitle ?? "default", categoryTrackers: convertedTrackers)

@@ -10,15 +10,12 @@ import UIKit
 
 protocol TrackerSpecsDelegate: AnyObject {
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
-    func didReceiveCategoriesList(newList: [String])
 }
 
 final class TrackersVC: UIViewController {
     
-    var categories: [TrackerCategory] = []
     var categoriesVisible: [TrackerCategory] = []
-    var completedTrackers: [TrackerRecord] = []
-    var allPossibleCategories: [String] = ["Важные дела"]
+    var defaultCategory: [String] = ["Важные дела"]
     var currentDate: Date!
     
     var starImage: UIImageView!
@@ -34,26 +31,7 @@ final class TrackersVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        let trackerCategoryStore = TrackerCategoryStore()
-//        trackerCategoryStore.createTrackerCategory(categoryTitle: "Срочно")
-//        let trackerCategory = trackerCategoryStore.fetchTrackerCategory(by: "Срочно")!.toCategory
-//        categoriesVisible.append(trackerCategory)
-        
-//        purgeAllData()
-//        print("***********************")
-//        print("from viewDidLoad:")
-//        trackerCategoryStore.printAllCategories()
-//        print("Records:")
-//        trackerRecordStore.printAllRecords()
-//        print("Trackers:")
-//        trackerCategoryStore.trackerStore.printAllTrackers()
-//        print("***********************")
-        
-        trackerRecordStore.purgeTrackerRecords()
-//        print("Records:")
-//        trackerRecordStore.printAllRecords()
-        allPossibleCategories.append(contentsOf: shareAllCategories(categoriesList: categories))
+        purgeAllData()
         setupTrackerScreen()
         dateDidChange()
     }
@@ -68,7 +46,12 @@ final class TrackersVC: UIViewController {
     private func plusButtonPressed() {
         let modalVC = NewTrackerTypeVC()
         modalVC.delegateLink = self
-        modalVC.delegateListShare = allPossibleCategories
+        let allPossibleTitles = trackerCategoryStore.getAllPossibleTitles()
+        if allPossibleTitles.contains(where: {$0 == defaultCategory[0]}) {
+            modalVC.delegateListShare = allPossibleTitles
+        } else {
+            modalVC.delegateListShare = allPossibleTitles + defaultCategory
+        }
         let navController = UINavigationController(rootViewController: modalVC)
         present(navController, animated: true)
     }
@@ -83,25 +66,9 @@ final class TrackersVC: UIViewController {
     private func filterDateChange() {
         categoriesVisible = []
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
-//        for currentCategory in categories {
-//            let filteredTrackers = currentCategory.categoryTrackers.filter { tracker in
-//                tracker.schedule?.contains(currentDayOfWeek) == true
-//            }
-//            if !filteredTrackers.isEmpty {
-//                categoriesVisible.append(TrackerCategory(categoryTitle: currentCategory.categoryTitle, categoryTrackers: filteredTrackers))
-//            }
-//        }
-        //TODO: оставить только кор дату
-        // ******
         let filteredTrackers = trackerCategoryStore.fetchTrackerCategoryForDay(by: currentDayOfWeek)
         let convertedTrackers = trackerCategoryStore.convertToCategory(filteredTrackers)
         categoriesVisible.append(contentsOf: convertedTrackers)
-        // ******
-//        print("-----> Categories VISIBLE : ")
-//        categoriesVisible.forEach { categoryVisible in
-//                print(categoryVisible)
-//        }
-        print("-------------")
         if categoriesVisible.isEmpty {
             displayEmptyScreen(isActive: true)
         } else {
@@ -220,10 +187,7 @@ final class TrackersVC: UIViewController {
     }
     
     private func isTrackerCompleteCurrentDate(id: UUID) -> Bool {
-        //TODO: оставить только result
-//        let isCompeled = completedTrackers.contains(where: {$0.recordID == id && $0.dateComplete == currentDate})
         let result = trackerRecordStore.checkIfRecordExist(id, currentDate)
-//        return isCompeled
         return result
     }
 }
@@ -238,16 +202,12 @@ extension TrackersVC: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        //TODO: здесь нуэно не только проверку на тек состояние сделать но и что=то с indexPath
         let currentItem = categoriesVisible[indexPath.section].categoryTrackers[indexPath.row]
-//        let completeDays = completedTrackers.filter({ $0.recordID == currentItem.trackerID }).count
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
         cell?.delegate = self
         cell?.dataModel = currentItem
         cell?.currentDate = currentDate
         cell?.indexPath = indexPath
-//        cell?.completeDays = completeDays
-        
         cell?.completeDays = trackerRecordStore.getCompleteDays(currentItem.trackerID)
         cell?.isComplete = isTrackerCompleteCurrentDate(id: currentItem.trackerID)
         return cell ?? UICollectionViewCell()
@@ -284,29 +244,12 @@ extension TrackersVC: UICollectionViewDelegateFlowLayout {
 }
 
 extension TrackersVC: TrackerSpecsDelegate {
-    func didReceiveCategoriesList(newList: [String]) {
-        let newUniqueElements = newList.filter({ !allPossibleCategories.contains($0) })
-        allPossibleCategories.append(contentsOf: newUniqueElements)
-    }
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
-        if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
-            //TODO: добавить проверку из кор даты
-            let mergeTrackerArray = categories[index].categoryTrackers + newTrackerCategory.categoryTrackers
-            let mergeCategory = TrackerCategory(categoryTitle: newTrackerCategory.categoryTitle, categoryTrackers: mergeTrackerArray)
-            categories[index] = mergeCategory
-            
+        if let existingCategory = trackerCategoryStore.fetchTrackerCategory(by: newTrackerCategory.categoryTitle) {
             trackerCategoryStore.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
-            
-            print("***********************")
-            print("from didReceiveTracker OLD CAT:")
-            trackerCategoryStore.printAllCategories()
-            print("***********************")
         }
         else {
-            //TODO: убрать categories
-            categories.append(newTrackerCategory)
-            
             trackerCategoryStore.createTrackerCategory(categoryTitle: newTrackerCategory.categoryTitle)
             trackerCategoryStore.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
         }

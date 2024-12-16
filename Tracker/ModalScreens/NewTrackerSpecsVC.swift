@@ -141,7 +141,6 @@ final class NewTrackerSpecsVC: UIViewController {
         
         let newTrackerCategory = TrackerCategory(categoryTitle: chosenCategory, categoryTrackers: [newTracker])
         delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
-        delegate?.didReceiveCategoriesList(newList: possibleCategories)
         dismiss(animated: true, completion: nil)
     }
     

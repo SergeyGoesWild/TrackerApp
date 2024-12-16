@@ -55,7 +55,6 @@ final class TrackerRecordStore {
         
         do {
             let count = try context.count(for: fetchRequest)
-            print("COUNT ----> ", count)
             return count
         } catch {
             print(error)
