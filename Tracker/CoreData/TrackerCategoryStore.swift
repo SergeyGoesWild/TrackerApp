@@ -10,7 +10,7 @@ import CoreData
 
 final class TrackerCategoryStore {
     private let context: NSManagedObjectContext
-    private var trackerStore: TrackerStore
+    var trackerStore: TrackerStore
     
     convenience init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -83,6 +83,21 @@ final class TrackerCategoryStore {
         }
     }
     
+    func printAllCategories() {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        
+        do {
+            let allCategories = try context.fetch(fetchRequest)
+            let allCategoriesConverted = convertToCategory(allCategories)
+            allCategoriesConverted.forEach { category in
+                print(category)
+            }
+        }
+        catch {
+            print("Ошибка распечатки категорий")
+        }
+    }
+    
     func convertToCategory(_ trackerCategoryCD: [TrackerCategoryCoreData]) -> [TrackerCategory] {
         var convertedCategory: [TrackerCategory] = []
         trackerCategoryCD.forEach { trackerCategory in
@@ -95,6 +110,18 @@ final class TrackerCategoryStore {
         }
         
         return convertedCategory
+    }
+    
+    func purgeTrackerCategories() {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "TrackerCategoryCoreData")
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        
+        do {
+            try context.execute(deleteRequest)
+            try context.save()
+        } catch {
+            print("Failed to delete all instances of TrackerCategory: \(error)")
+        }
     }
     
     private func saveContext() {

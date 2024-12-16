@@ -41,7 +41,7 @@ final class TrackerStore {
     
     func fetchTracker(by id: UUID) -> TrackerCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "trackerID == %@", id as CVarArg)
         fetchRequest.fetchLimit = 1
 
         do {
@@ -56,10 +56,37 @@ final class TrackerStore {
         let newSchedule = Array(trackerCD.schedule as! Set<ScheduleUnit>).compactMap({ $0.value })
         let newTracker = Tracker(trackerID: trackerCD.trackerID ?? UUID(),
                                  trackerName: trackerCD.trackerName ?? "default",
-                                 color: uiColorMarshalling.color(from: trackerCD.color ?? "#1273DE"),
+                                 color: uiColorMarshalling.color(from: trackerCD.color ?? "#FFFFF"),
                                  emoji: trackerCD.emoji ?? "x",
                                  schedule: newSchedule)
         return newTracker
+    }
+    
+    func purgeTrackers() {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "TrackerCoreData")
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        
+        do {
+            try context.execute(deleteRequest)
+            try context.save()
+        } catch {
+            print("Failed to delete all instances of Tracker: \(error)")
+        }
+    }
+    
+    func printAllTrackers() {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        
+        do {
+            let allTrackers = try context.fetch(fetchRequest)
+            allTrackers.forEach { tracker in
+                print("-")
+                print(convertToTracker(tracker))
+            }
+        }
+        catch {
+            print("Ошибка распечатки категорий")
+        }
     }
     
     private func saveContext() {

@@ -36,13 +36,32 @@ final class TrackersVC: UIViewController {
         super.viewDidLoad()
         
 //        let trackerCategoryStore = TrackerCategoryStore()
-        //trackerCategoryStore.createTrackerCategory(categoryTitle: "Срочно")
+//        trackerCategoryStore.createTrackerCategory(categoryTitle: "Срочно")
 //        let trackerCategory = trackerCategoryStore.fetchTrackerCategory(by: "Срочно")!.toCategory
 //        categoriesVisible.append(trackerCategory)
         
+//        purgeAllData()
+//        print("***********************")
+//        print("from viewDidLoad:")
+//        trackerCategoryStore.printAllCategories()
+//        print("Records:")
+//        trackerRecordStore.printAllRecords()
+//        print("Trackers:")
+//        trackerCategoryStore.trackerStore.printAllTrackers()
+//        print("***********************")
+        
+        trackerRecordStore.purgeTrackerRecords()
+//        print("Records:")
+//        trackerRecordStore.printAllRecords()
         allPossibleCategories.append(contentsOf: shareAllCategories(categoriesList: categories))
         setupTrackerScreen()
         dateDidChange()
+    }
+    
+    private func purgeAllData() {
+        trackerCategoryStore.purgeTrackerCategories()
+        trackerCategoryStore.trackerStore.purgeTrackers()
+        trackerRecordStore.purgeTrackerRecords()
     }
     
     @objc
@@ -64,21 +83,25 @@ final class TrackersVC: UIViewController {
     private func filterDateChange() {
         categoriesVisible = []
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
-        for currentCategory in categories {
-            let filteredTrackers = currentCategory.categoryTrackers.filter { tracker in
-                tracker.schedule?.contains(currentDayOfWeek) == true
-            }
-            if !filteredTrackers.isEmpty {
-                categoriesVisible.append(TrackerCategory(categoryTitle: currentCategory.categoryTitle, categoryTrackers: filteredTrackers))
-            }
-        }
+//        for currentCategory in categories {
+//            let filteredTrackers = currentCategory.categoryTrackers.filter { tracker in
+//                tracker.schedule?.contains(currentDayOfWeek) == true
+//            }
+//            if !filteredTrackers.isEmpty {
+//                categoriesVisible.append(TrackerCategory(categoryTitle: currentCategory.categoryTitle, categoryTrackers: filteredTrackers))
+//            }
+//        }
         //TODO: оставить только кор дату
         // ******
         let filteredTrackers = trackerCategoryStore.fetchTrackerCategoryForDay(by: currentDayOfWeek)
         let convertedTrackers = trackerCategoryStore.convertToCategory(filteredTrackers)
         categoriesVisible.append(contentsOf: convertedTrackers)
         // ******
-        
+//        print("-----> Categories VISIBLE : ")
+//        categoriesVisible.forEach { categoryVisible in
+//                print(categoryVisible)
+//        }
+        print("-------------")
         if categoriesVisible.isEmpty {
             displayEmptyScreen(isActive: true)
         } else {
@@ -198,9 +221,10 @@ final class TrackersVC: UIViewController {
     
     private func isTrackerCompleteCurrentDate(id: UUID) -> Bool {
         //TODO: оставить только result
-        let isCompeled = completedTrackers.contains(where: {$0.recordID == id && $0.dateComplete == currentDate})
+//        let isCompeled = completedTrackers.contains(where: {$0.recordID == id && $0.dateComplete == currentDate})
         let result = trackerRecordStore.checkIfRecordExist(id, currentDate)
-        return isCompeled
+//        return isCompeled
+        return result
     }
 }
 
@@ -216,15 +240,15 @@ extension TrackersVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         //TODO: здесь нуэно не только проверку на тек состояние сделать но и что=то с indexPath
         let currentItem = categoriesVisible[indexPath.section].categoryTrackers[indexPath.row]
-        let completeDays = completedTrackers.filter({ $0.recordID == currentItem.trackerID }).count
+//        let completeDays = completedTrackers.filter({ $0.recordID == currentItem.trackerID }).count
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
         cell?.delegate = self
         cell?.dataModel = currentItem
         cell?.currentDate = currentDate
         cell?.indexPath = indexPath
-        cell?.completeDays = completeDays
+//        cell?.completeDays = completeDays
         
-        // cell?.completeDays = trackerRecordStore.getCompleteDays(currentItem.trackerID)
+        cell?.completeDays = trackerRecordStore.getCompleteDays(currentItem.trackerID)
         cell?.isComplete = isTrackerCompleteCurrentDate(id: currentItem.trackerID)
         return cell ?? UICollectionViewCell()
     }
@@ -273,6 +297,11 @@ extension TrackersVC: TrackerSpecsDelegate {
             categories[index] = mergeCategory
             
             trackerCategoryStore.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
+            
+            print("***********************")
+            print("from didReceiveTracker OLD CAT:")
+            trackerCategoryStore.printAllCategories()
+            print("***********************")
         }
         else {
             //TODO: убрать categories
@@ -287,21 +316,19 @@ extension TrackersVC: TrackerSpecsDelegate {
 
 extension TrackersVC: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.append(TrackerRecord(recordID: id, dateComplete: currentDate))
-        trackerCollection.reloadItems(at: [indexPath])
-        //TODO: оставать только кор дату и приделать reload, что то сделать с indexPath
         trackerRecordStore.createRecord(id, currentDate)
+        trackerRecordStore.printAllRecords()
+        trackerCollection.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.removeAll(where: { $0.recordID == id && $0.dateComplete == currentDate})
-        trackerCollection.reloadItems(at: [indexPath])
-        //TODO: оставать только кор дату и приделать reload
         do {
-            try trackerRecordStore.deleteRecord(withID: id)
+            try trackerRecordStore.deleteRecord(withID: id, on: currentDate)
+            trackerRecordStore.printAllRecords()
         }
         catch {
             print("Ошибка при удалении элемента")
         }
+        trackerCollection.reloadItems(at: [indexPath])
     }
 }

@@ -37,7 +37,7 @@ final class TrackerRecordStore {
     
     func checkIfRecordExist(_ id: UUID, _ date: Date) -> Bool {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "trackerID == %@ AND creationDate == %@", id as CVarArg, date as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "tracker.trackerID == %@ AND dateComplete == %@", id as CVarArg, date as CVarArg)
         fetchRequest.fetchLimit = 1
         
         do {
@@ -51,10 +51,11 @@ final class TrackerRecordStore {
     
     func getCompleteDays(_ id: UUID) -> Int {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "trackerID == %@", id as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "tracker.trackerID == %@", id as CVarArg)
         
         do {
             let count = try context.count(for: fetchRequest)
+            print("COUNT ----> ", count)
             return count
         } catch {
             print(error)
@@ -62,9 +63,9 @@ final class TrackerRecordStore {
         }
     }
     
-    func deleteRecord(withID id: UUID) throws {
+    func deleteRecord(withID id: UUID, on date: Date) throws {
         let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "trackerID == %@", id as CVarArg)
+        fetchRequest.predicate = NSPredicate(format: "tracker.trackerID == %@ AND dateComplete == %@", id as CVarArg, date as CVarArg)
         
         do {
             let results = try context.fetch(fetchRequest)
@@ -77,6 +78,32 @@ final class TrackerRecordStore {
             }
         } catch {
             throw error
+        }
+    }
+    
+    func purgeTrackerRecords() {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "TrackerRecordCoreData")
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        
+        do {
+            try context.execute(deleteRequest)
+            try context.save()
+        } catch {
+            print("Failed to delete all instances of TrackerRecords: \(error)")
+        }
+    }
+    
+    func printAllRecords() {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        
+        do {
+            let allRecords = try context.fetch(fetchRequest)
+            allRecords.forEach { record in
+                print("->", record)
+            }
+        }
+        catch {
+            print("Ошибка распечатки категорий")
         }
     }
     
