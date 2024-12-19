@@ -64,13 +64,6 @@ final class TrackerCategoryStore {
             trackerCategory.addToTrackers(newTrackerCD)
             saveContext()
         }
-        if let fetchedObjects = fetchedResultsController.fetchedObjects {
-            for (index, object) in fetchedObjects.enumerated() {
-                print("Object \(index): \(object)")
-            }
-        } else {
-            print("No objects fetched")
-        }
     }
     
     func getAllPossibleTitles() -> [String] {
@@ -128,7 +121,6 @@ final class TrackerCategoryStore {
             let newCategory = TrackerCategory(categoryTitle: trackerCategory.categoryTitle ?? "default", categoryTrackers: convertedTrackers)
             convertedCategory.append(newCategory)
         }
-        
         return convertedCategory
     }
     

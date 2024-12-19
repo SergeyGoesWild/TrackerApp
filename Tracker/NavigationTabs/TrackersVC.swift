@@ -68,7 +68,6 @@ final class TrackersVC: UIViewController {
     private func filterDateChange() {
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
         trackerCategoryStore.fetchCategoriesByDay(for: currentDayOfWeek)
-        printControllerState()
         
         if let objects = trackerCategoryStore.fetchedResultsController.fetchedObjects, objects.isEmpty == false {
             displayEmptyScreen(isActive: false)
@@ -195,17 +194,6 @@ extension TrackersVC: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print("ENTER")
-        if let sections = trackerCategoryStore.fetchedResultsController.sections {
-            print("XXXXXXX")
-            for (index, section) in sections.enumerated() {
-                print("Section \(index): \(section.numberOfObjects) objects")
-            }
-            print("XXXXXXX")
-        } else {
-            print("---------------------> No sections in fetchedResultsController")
-        }
-        
         let category = trackerCategoryStore.fetchedResultsController.sections?[section]
         guard let objects = category?.objects as? [TrackerCategoryCoreData], let categoryObject = objects.first else {
             return 0
@@ -229,11 +217,9 @@ extension TrackersVC: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as? TrackerHeader
-//        let currentItemCD = trackerCategoryStore.fetchedResultsController.object(at: indexPath)
-//        header?.headerText = trackerCategoryStore.convertToCategory([currentItemCD])[0].categoryTitle
-        header?.headerText = "Aaaa"
+        let currentItemCD = trackerCategoryStore.fetchedResultsController.object(at: indexPath)
+        header?.headerText = trackerCategoryStore.convertToCategory([currentItemCD])[0].categoryTitle
         return header ?? UICollectionReusableView()
-//        return UICollectionReusableView()
     }
 }
 
@@ -294,32 +280,17 @@ extension TrackersVC: TrackerCellDelegate {
 }
 
 extension TrackersVC: NSFetchedResultsControllerDelegate {
-    func printControllerState() {
-        print("********************************************************")
-        print("Fetched Results Controller Content Changed:")
-        if let fetchedObjects = trackerCategoryStore.fetchedResultsController.fetchedObjects {
-            print(fetchedObjects.count)
-            for (index, object) in fetchedObjects.enumerated() {
-                print("Object \(index): \(trackerCategoryStore.convertToCategory([object]))")
-            }
-        } else {
-            print("No objects fetched")
-        }
-    }
-    
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        trackerCollection.performBatchUpdates(nil)
-    }
-    
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
                     didChange anObject: Any,
                     at indexPath: IndexPath?,
+                    atSectionIndex sectionIndex: Int,
                     for type: NSFetchedResultsChangeType,
                     newIndexPath: IndexPath?) {
+        let indexSet = IndexSet(integer: sectionIndex)
         switch type {
         case .insert:
             if let newIndexPath = newIndexPath {
-                self.trackerCollection.insertItems(at: [newIndexPath])
+                trackerCollection.insertSections(indexSet)
             }
            
         case .delete:
@@ -337,10 +308,5 @@ extension TrackersVC: NSFetchedResultsControllerDelegate {
         @unknown default:
             fatalError("Unknown change type in NSFetchedResultsControllerDelegate.")
         }
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        printControllerState()
-        trackerCollection.reloadData()
     }
 }
