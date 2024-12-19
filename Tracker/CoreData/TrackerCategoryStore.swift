@@ -11,15 +11,45 @@ import CoreData
 final class TrackerCategoryStore {
     private let context: NSManagedObjectContext
     var trackerStore: TrackerStore
+    var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>!
     
     convenience init() {
         let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context, trackerStore: TrackerStore(context: context))
+        try! self.init(context: context, trackerStore: TrackerStore(context: context))
     }
     
-    init(context: NSManagedObjectContext, trackerStore: TrackerStore) {
+    init(context: NSManagedObjectContext, trackerStore: TrackerStore) throws {
         self.context = context
         self.trackerStore = trackerStore
+        setupFetchedResultsController()
+    }
+    
+    func setupFetchedResultsController() {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "categoryTitle", ascending: true)]
+        fetchedResultsController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: "categoryTitle",
+            cacheName: nil
+        )
+        do {
+            try fetchedResultsController.performFetch()
+            print("Fetched \(fetchedResultsController.fetchedObjects?.count ?? 0) objects.")
+        } catch {
+            print("Failed to fetch data: \(error)")
+        }
+    }
+    
+    func fetchCategoriesByDay(for dayOfWeek: String) {
+        fetchedResultsController.fetchRequest.predicate = NSPredicate(
+            format: "SUBQUERY(trackers, $tracker, ANY $tracker.schedule.value == %@).@count > 0", dayOfWeek
+        )
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("Failed to update fetch request: \(error)")
+        }
     }
     
     func createTrackerCategory(categoryTitle: String) {
@@ -33,6 +63,13 @@ final class TrackerCategoryStore {
             let newTrackerCD = trackerStore.createTracker(newTracker)
             trackerCategory.addToTrackers(newTrackerCD)
             saveContext()
+        }
+        if let fetchedObjects = fetchedResultsController.fetchedObjects {
+            for (index, object) in fetchedObjects.enumerated() {
+                print("Object \(index): \(object)")
+            }
+        } else {
+            print("No objects fetched")
         }
     }
     
@@ -64,35 +101,6 @@ final class TrackerCategoryStore {
         } catch {
             print("Ошибка при получении категории: \(error)")
             return nil
-        }
-    }
-    
-    func fetchTrackerCategoryForDay(by dayOfWeek: String) -> [TrackerCategoryCoreData] {
-        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        
-        do {
-            let allCategories = try context.fetch(fetchRequest)
-            var filteredCategories: [TrackerCategoryCoreData] = []
-            
-            for currentCategory in allCategories {
-                if let trackers = currentCategory.trackers as? Set<TrackerCoreData> {
-                    let matchingTrackers = trackers.filter { tracker in
-                        if let scheduleUnits = tracker.schedule as? Set<ScheduleUnit> {
-                            return scheduleUnits.contains { $0.value == dayOfWeek }
-                        }
-                        return false
-                    }
-                    if !matchingTrackers.isEmpty {
-                        currentCategory.trackers = NSSet(set: matchingTrackers)
-                        filteredCategories.append(currentCategory)
-                    }
-                }
-            }
-            return filteredCategories
-            
-        } catch {
-            print("Ошибка при получении категории: \(error)")
-            return []
         }
     }
     

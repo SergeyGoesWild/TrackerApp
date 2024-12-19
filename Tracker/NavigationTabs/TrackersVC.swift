@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 protocol TrackerSpecsDelegate: AnyObject {
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
@@ -32,6 +33,7 @@ final class TrackersVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         purgeAllData()
+        trackerCategoryStore.fetchedResultsController.delegate = self
         setupTrackerScreen()
         dateDidChange()
     }
@@ -64,16 +66,15 @@ final class TrackersVC: UIViewController {
     }
     
     private func filterDateChange() {
-        categoriesVisible = []
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
-        let filteredTrackers = trackerCategoryStore.fetchTrackerCategoryForDay(by: currentDayOfWeek)
-        let convertedTrackers = trackerCategoryStore.convertToCategory(filteredTrackers)
-        categoriesVisible.append(contentsOf: convertedTrackers)
-        if categoriesVisible.isEmpty {
-            displayEmptyScreen(isActive: true)
-        } else {
+        trackerCategoryStore.fetchCategoriesByDay(for: currentDayOfWeek)
+        printControllerState()
+        
+        if let objects = trackerCategoryStore.fetchedResultsController.fetchedObjects, objects.isEmpty == false {
             displayEmptyScreen(isActive: false)
             trackerCollection.reloadData()
+        } else {
+            displayEmptyScreen(isActive: true)
         }
     }
     
@@ -83,7 +84,7 @@ final class TrackersVC: UIViewController {
         let currentDayOfWeek = dateFormatter.string(from: date)
         return currentDayOfWeek
     }
-        
+    
     private func setupTrackerScreen() {
         view.backgroundColor = .white
         
@@ -120,12 +121,12 @@ final class TrackersVC: UIViewController {
         searchBar.searchBarStyle = .minimal
         let textField = searchBar.searchTextField
         textField.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                textField.leadingAnchor.constraint(equalTo: searchBar.leadingAnchor, constant: 0),
-                textField.trailingAnchor.constraint(equalTo: searchBar.trailingAnchor, constant: 0),
-                textField.heightAnchor.constraint(equalTo: searchBar.heightAnchor, constant: 0),
-                textField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0),
-            ])
+        NSLayoutConstraint.activate([
+            textField.leadingAnchor.constraint(equalTo: searchBar.leadingAnchor, constant: 0),
+            textField.trailingAnchor.constraint(equalTo: searchBar.trailingAnchor, constant: 0),
+            textField.heightAnchor.constraint(equalTo: searchBar.heightAnchor, constant: 0),
+            textField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0),
+        ])
         view.addSubview(searchBar)
         
         trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
@@ -182,10 +183,6 @@ final class TrackersVC: UIViewController {
         trackerCollection.isHidden = isActive
     }
     
-    private func shareAllCategories(categoriesList: [TrackerCategory]) -> [String] {
-        return categoriesList.map { $0.categoryTitle }
-    }
-    
     private func isTrackerCompleteCurrentDate(id: UUID) -> Bool {
         let result = trackerRecordStore.checkIfRecordExist(id, currentDate)
         return result
@@ -194,29 +191,49 @@ final class TrackersVC: UIViewController {
 
 extension TrackersVC: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categoriesVisible.count
+        return trackerCategoryStore.fetchedResultsController.sections?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categoriesVisible[section].categoryTrackers.count
+        print("ENTER")
+        if let sections = trackerCategoryStore.fetchedResultsController.sections {
+            print("XXXXXXX")
+            for (index, section) in sections.enumerated() {
+                print("Section \(index): \(section.numberOfObjects) objects")
+            }
+            print("XXXXXXX")
+        } else {
+            print("---------------------> No sections in fetchedResultsController")
+        }
+        
+        let category = trackerCategoryStore.fetchedResultsController.sections?[section]
+        guard let objects = category?.objects as? [TrackerCategoryCoreData], let categoryObject = objects.first else {
+            return 0
+        }
+        return categoryObject.trackers?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let currentItem = categoriesVisible[indexPath.section].categoryTrackers[indexPath.row]
+        let categoryCD = trackerCategoryStore.fetchedResultsController.object(at: IndexPath(row: 0, section: indexPath.section))
+        let trackers = Array(categoryCD.trackers as? Set<TrackerCoreData> ?? []).sorted { $0.trackerName ?? "" < $1.trackerName ?? "" }
+        let tracker = trackerCategoryStore.trackerStore.convertToTracker(trackers[indexPath.row])
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
         cell?.delegate = self
-        cell?.dataModel = currentItem
+        cell?.dataModel = tracker
         cell?.currentDate = currentDate
         cell?.indexPath = indexPath
-        cell?.completeDays = trackerRecordStore.getCompleteDays(currentItem.trackerID)
-        cell?.isComplete = isTrackerCompleteCurrentDate(id: currentItem.trackerID)
+        cell?.completeDays = trackerRecordStore.getCompleteDays(tracker.trackerID)
+        cell?.isComplete = isTrackerCompleteCurrentDate(id: tracker.trackerID)
         return cell ?? UICollectionViewCell()
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as? TrackerHeader
-        header?.headerText = categoriesVisible[indexPath.section].categoryTitle
+//        let currentItemCD = trackerCategoryStore.fetchedResultsController.object(at: indexPath)
+//        header?.headerText = trackerCategoryStore.convertToCategory([currentItemCD])[0].categoryTitle
+        header?.headerText = "Aaaa"
         return header ?? UICollectionReusableView()
+//        return UICollectionReusableView()
     }
 }
 
@@ -246,7 +263,7 @@ extension TrackersVC: UICollectionViewDelegateFlowLayout {
 extension TrackersVC: TrackerSpecsDelegate {
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
-        if let existingCategory = trackerCategoryStore.fetchTrackerCategory(by: newTrackerCategory.categoryTitle) {
+        if trackerCategoryStore.fetchTrackerCategory(by: newTrackerCategory.categoryTitle) != nil {
             trackerCategoryStore.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
         }
         else {
@@ -273,5 +290,57 @@ extension TrackersVC: TrackerCellDelegate {
             print("Ошибка при удалении элемента")
         }
         trackerCollection.reloadItems(at: [indexPath])
+    }
+}
+
+extension TrackersVC: NSFetchedResultsControllerDelegate {
+    func printControllerState() {
+        print("********************************************************")
+        print("Fetched Results Controller Content Changed:")
+        if let fetchedObjects = trackerCategoryStore.fetchedResultsController.fetchedObjects {
+            print(fetchedObjects.count)
+            for (index, object) in fetchedObjects.enumerated() {
+                print("Object \(index): \(trackerCategoryStore.convertToCategory([object]))")
+            }
+        } else {
+            print("No objects fetched")
+        }
+    }
+    
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        trackerCollection.performBatchUpdates(nil)
+    }
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+                    didChange anObject: Any,
+                    at indexPath: IndexPath?,
+                    for type: NSFetchedResultsChangeType,
+                    newIndexPath: IndexPath?) {
+        switch type {
+        case .insert:
+            if let newIndexPath = newIndexPath {
+                self.trackerCollection.insertItems(at: [newIndexPath])
+            }
+           
+        case .delete:
+            if let indexPath = indexPath {
+                trackerCollection.deleteItems(at: [indexPath])
+            }
+        case .update:
+            if let indexPath = indexPath {
+                trackerCollection.reloadItems(at: [indexPath])
+            }
+        case .move:
+            if let indexPath = indexPath, let newIndexPath = newIndexPath {
+                trackerCollection.moveItem(at: indexPath, to: newIndexPath)
+            }
+        @unknown default:
+            fatalError("Unknown change type in NSFetchedResultsControllerDelegate.")
+        }
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        printControllerState()
+        trackerCollection.reloadData()
     }
 }
