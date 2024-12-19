@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import CoreData
+// Комментарий для ревьюера. здесь я все же импортировал CoreData, так как пользуюсь здесь методами fetchedResultsController. до его имплементации я мог обойтись без данного импорта, а после имплементации уже не знаю как обойтись без данного импорта.
 
 protocol TrackerSpecsDelegate: AnyObject {
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
@@ -32,7 +33,7 @@ final class TrackersVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        purgeAllData()
+//        purgeAllData()
         trackerCategoryStore.fetchedResultsController.delegate = self
         setupTrackerScreen()
         dateDidChange()
