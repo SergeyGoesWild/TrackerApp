@@ -8,10 +8,49 @@
 import Foundation
 import UIKit
 
+protocol TrackerCellDelegate: AnyObject {
+    func completeTracker(id: UUID, at indexPath: IndexPath)
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath)
+}
+
 final class TrackerCell: UICollectionViewCell {
     
-    var dataModel: Tracker!
+    weak var delegate: TrackerCellDelegate?
+    var isComplete: Bool? {
+        didSet {
+            guard let isComplete = isComplete else { return }
+            if isComplete {
+                addDayButton.setImage(UIImage(named: "CheckIcon")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
+            } else {
+                addDayButton.setImage(UIImage(named: "PlusIconSVG")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
+            }
+        }
+    }
     
+    var dataModel: Tracker? {
+        didSet {
+            guard let dataModel = dataModel else { return }
+            coloredBackground.backgroundColor = dataModel.color
+            emojiLabel.text = dataModel.emoji
+            titleLabel.text = dataModel.trackerName
+            addDayButton.backgroundColor = dataModel.color
+        }
+    }
+    var currentDate: Date? {
+        didSet {
+            let isNotActive: Bool = getCleanDate(date: currentDate!) > getCleanDate(date: Date())
+            addDayButton.isEnabled = !isNotActive
+            addDayButton.backgroundColor = dataModel!.color.withAlphaComponent(isNotActive ? 0.3 : 1.0)
+        }
+    }
+    
+    var completeDays: Int? {
+        didSet {
+            dayLabel.text = pluralizeDays(completeDays ?? 0)
+        }
+    }
+    
+    var indexPath: IndexPath?
     var coloredBackground: UIView!
     var emojiCircle: UIView!
     var emojiLabel: UILabel!
@@ -21,7 +60,6 @@ final class TrackerCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        dataModel = Tracker(trackerID: UUID(), trackerName: "Поливать растения", color: UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 1.00), emoji: "❤", schedule: ["Monday"])
         setupTrackerView()
     }
     
@@ -29,11 +67,16 @@ final class TrackerCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private func getCleanDate(date: Date) -> Date {
+        let calendar = Calendar.current
+        let dateOnly = calendar.startOfDay(for: date)
+        return dateOnly
+    }
+    
     private func setupTrackerView() {
         
         coloredBackground = UIView()
         coloredBackground.translatesAutoresizingMaskIntoConstraints = false
-        coloredBackground.backgroundColor = dataModel.color
         coloredBackground.layer.cornerRadius = CGFloat(16)
         contentView.addSubview(coloredBackground)
         
@@ -45,26 +88,23 @@ final class TrackerCell: UICollectionViewCell {
         
         emojiLabel = UILabel()
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-        emojiLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
-        emojiLabel.text = dataModel.emoji
+        emojiLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
         contentView.addSubview(emojiLabel)
         
         titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = dataModel.trackerName
         titleLabel.font = UIFont.systemFont(ofSize: 12)
         titleLabel.textColor = .white
         contentView.addSubview(titleLabel)
         
         dayLabel = UILabel()
         dayLabel.translatesAutoresizingMaskIntoConstraints = false
-        dayLabel.text = getCounterText()
+        dayLabel.text = ""
         dayLabel.font = UIFont.systemFont(ofSize: 12)
         contentView.addSubview(dayLabel)
         
         addDayButton = UIButton()
         addDayButton.translatesAutoresizingMaskIntoConstraints = false
-        addDayButton.backgroundColor = dataModel.color
         addDayButton.setImage(UIImage(named: "PlusIconSVG")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
         addDayButton.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         addDayButton.layer.cornerRadius = 17
@@ -93,21 +133,19 @@ final class TrackerCell: UICollectionViewCell {
         ])
     }
     
-    //TODO: Написать функцию, которая реагирует на нажатия плюса на трекере
     @objc private func addDayPressed() {
-        addDayButton.setImage(UIImage(named: "CheckIcon")?.withTintColor(UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)), for: .normal)
-        addDayButton.backgroundColor?.withAlphaComponent(0.30)
-        
-        //TODO: работаем с делегатом
+        guard let isComplete = isComplete else { return }
+        guard let indexPath = indexPath else { return }
+        if isComplete {
+            delegate?.uncompleteTracker(id: dataModel!.trackerID, at: indexPath)
+        } else {
+            delegate?.completeTracker(id: dataModel!.trackerID, at: indexPath)
+        }
     }
     
-    //TODO: Написать функцию, которая будет формировать сообщение для счетчика
-    private func getCounterText() -> String {
-        return "\(getCounterDays()) день"
-    }
-    
-    //TODO: Написать функцию, которая будет считать дни для счетчика
-    private func getCounterDays() -> Int {
-        return 1
+    private func pluralizeDays(_ count: Int) -> String {
+        let form = count % 100 > 10 && count % 100 < 20 ? 2 : (count % 10 == 1 ? 0 : (count % 10 >= 2 && count % 10 <= 4 ? 1 : 2))
+        let forms = ["день", "дня", "дней"]
+        return "\(count) \(forms[form])"
     }
 }
