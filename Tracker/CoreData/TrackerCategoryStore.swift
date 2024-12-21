@@ -14,7 +14,7 @@ final class TrackerCategoryStore {
     var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>!
     
     init(trackerStore: TrackerStore) {
-        self.context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        self.context = ContextProvider.shared.context
         self.trackerStore = trackerStore
     }
     

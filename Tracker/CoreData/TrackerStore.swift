@@ -12,12 +12,12 @@ import CoreData
 final class TrackerStore {
     private let context: NSManagedObjectContext
     private let uiColorMarshalling = UIColorMarshalling()
-
+    
     convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        let context = ContextProvider.shared.context
         self.init(context: context)
     }
-
+    
     init(context: NSManagedObjectContext) {
         self.context = context
     }
@@ -43,7 +43,7 @@ final class TrackerStore {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "trackerID == %@", id as CVarArg)
         fetchRequest.fetchLimit = 1
-
+        
         do {
             return try context.fetch(fetchRequest).first
         } catch {

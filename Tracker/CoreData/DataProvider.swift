@@ -19,7 +19,7 @@ final class DataProvider: NSObject {
     var onContentChanged: (() -> Void)?
     
     init(trackerCollection: UICollectionView) {
-        self.context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        self.context = ContextProvider.shared.context
         self.trackerStore = TrackerStore()
         self.trackerCategoryStore = TrackerCategoryStore(trackerStore: self.trackerStore)
         self.trackerRecordStore = TrackerRecordStore()
@@ -27,14 +27,14 @@ final class DataProvider: NSObject {
         super.init()
         setupFetchedResultsController()
     }
-
+    
     private func setupFetchedResultsController() {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "category.categoryTitle", ascending: true),
             NSSortDescriptor(key: "trackerName", ascending: true)
         ]
-
+        
         fetchedResultsController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
             managedObjectContext: context,
@@ -67,11 +67,11 @@ final class DataProvider: NSObject {
     func numberOfSections() -> Int {
         return fetchedResultsController.sections?.count ?? 0
     }
-
+    
     func numberOfItems(inSection section: Int) -> Int {
         return fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
-
+    
     func category(for sectionIndex: Int) -> String? {
         guard let sections = fetchedResultsController.sections,
               sectionIndex < sections.count else {
@@ -98,7 +98,7 @@ final class DataProvider: NSObject {
     
     //MARK: Tracker methods
     func createTracker(tracker: Tracker) -> TrackerCoreData {
-       return trackerStore.createTracker(tracker)
+        return trackerStore.createTracker(tracker)
     }
     
     func fetchTracker(by id: UUID) -> TrackerCoreData? {
@@ -157,7 +157,7 @@ extension DataProvider: NSFetchedResultsControllerDelegate {
         switch type {
         case .insert:
             trackerCollection.insertSections(indexSet)
-           
+            
         case .delete:
             if let indexPath = indexPath {
                 trackerCollection.deleteItems(at: [indexPath])

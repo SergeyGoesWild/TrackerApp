@@ -30,7 +30,7 @@ final class TrackersVC: UIViewController {
         super.viewDidLoad()
         setupTrackerScreen()
         dataProvider = DataProvider(trackerCollection: trackerCollection)
-//        dataProvider.purgeAllData()
+        //        dataProvider.purgeAllData()
         dateDidChange()
     }
     

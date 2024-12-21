@@ -14,7 +14,7 @@ final class TrackerRecordStore {
     private let trackerStore: TrackerStore
     
     convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        let context = ContextProvider.shared.context
         self.init(context: context, trackerStore: TrackerStore(context: context))
     }
     
@@ -25,8 +25,8 @@ final class TrackerRecordStore {
     
     func createRecord(_ trackerID: UUID, _ date: Date) {
         guard let tracker = trackerStore.fetchTracker(by: trackerID) else {
-                    print("Error: Tracker with ID \(trackerID) not found.")
-                    return
+            print("Error: Tracker with ID \(trackerID) not found.")
+            return
         }
         
         let newTrackerRecordCoreData = TrackerRecordCoreData(context: context)
