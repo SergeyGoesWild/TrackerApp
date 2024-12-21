@@ -10,15 +10,11 @@ import UIKit
 
 protocol TrackerSpecsDelegate: AnyObject {
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
-    func didReceiveCategoriesList(newList: [String])
 }
 
 final class TrackersVC: UIViewController {
     
-    var categories: [TrackerCategory] = []
-    var categoriesVisible: [TrackerCategory] = []
-    var completedTrackers: [TrackerRecord] = []
-    var allPossibleCategories: [String] = ["Важные дела"]
+    var defaultCategory: [String] = ["Важные дела"]
     var currentDate: Date!
     
     var starImage: UIImageView!
@@ -28,11 +24,13 @@ final class TrackersVC: UIViewController {
     var datePicker: UIDatePicker!
     var searchBar: UISearchBar!
     var trackerCollection: UICollectionView!
+    var dataProvider: DataProvider!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        allPossibleCategories.append(contentsOf: shareAllCategories(categoriesList: categories))
         setupTrackerScreen()
+        dataProvider = DataProvider(trackerCollection: trackerCollection)
+        //        dataProvider.purgeAllData()
         dateDidChange()
     }
     
@@ -40,7 +38,12 @@ final class TrackersVC: UIViewController {
     private func plusButtonPressed() {
         let modalVC = NewTrackerTypeVC()
         modalVC.delegateLink = self
-        modalVC.delegateListShare = allPossibleCategories
+        let allPossibleTitles = dataProvider.getAllPossibleTitles()
+        if allPossibleTitles.contains(where: {$0 == defaultCategory[0]}) {
+            modalVC.delegateListShare = allPossibleTitles
+        } else {
+            modalVC.delegateListShare = allPossibleTitles + defaultCategory
+        }
         let navController = UINavigationController(rootViewController: modalVC)
         present(navController, animated: true)
     }
@@ -53,21 +56,14 @@ final class TrackersVC: UIViewController {
     }
     
     private func filterDateChange() {
-        categoriesVisible = []
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
-        for currentCategory in categories {
-            let filteredTrackers = currentCategory.categoryTrackers.filter { tracker in
-                tracker.schedule?.contains(currentDayOfWeek) == true
-            }
-            if !filteredTrackers.isEmpty {
-                categoriesVisible.append(TrackerCategory(categoryTitle: currentCategory.categoryTitle, categoryTrackers: filteredTrackers))
-            }
-        }
-        if categoriesVisible.isEmpty {
-            displayEmptyScreen(isActive: true)
-        } else {
+        dataProvider.performFetchByDay(for: currentDayOfWeek)
+        
+        if dataProvider.numberOfSections() > 0 {
             displayEmptyScreen(isActive: false)
             trackerCollection.reloadData()
+        } else {
+            displayEmptyScreen(isActive: true)
         }
     }
     
@@ -77,7 +73,7 @@ final class TrackersVC: UIViewController {
         let currentDayOfWeek = dateFormatter.string(from: date)
         return currentDayOfWeek
     }
-        
+    
     private func setupTrackerScreen() {
         view.backgroundColor = .white
         
@@ -114,12 +110,12 @@ final class TrackersVC: UIViewController {
         searchBar.searchBarStyle = .minimal
         let textField = searchBar.searchTextField
         textField.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                textField.leadingAnchor.constraint(equalTo: searchBar.leadingAnchor, constant: 0),
-                textField.trailingAnchor.constraint(equalTo: searchBar.trailingAnchor, constant: 0),
-                textField.heightAnchor.constraint(equalTo: searchBar.heightAnchor, constant: 0),
-                textField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0),
-            ])
+        NSLayoutConstraint.activate([
+            textField.leadingAnchor.constraint(equalTo: searchBar.leadingAnchor, constant: 0),
+            textField.trailingAnchor.constraint(equalTo: searchBar.trailingAnchor, constant: 0),
+            textField.heightAnchor.constraint(equalTo: searchBar.heightAnchor, constant: 0),
+            textField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 0),
+        ])
         view.addSubview(searchBar)
         
         trackerCollection = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
@@ -176,41 +172,36 @@ final class TrackersVC: UIViewController {
         trackerCollection.isHidden = isActive
     }
     
-    private func shareAllCategories(categoriesList: [TrackerCategory]) -> [String] {
-        return categoriesList.map { $0.categoryTitle }
-    }
-    
     private func isTrackerCompleteCurrentDate(id: UUID) -> Bool {
-        let isCompeled = completedTrackers.contains(where: {$0.recordID == id && $0.dateComplete == currentDate})
-        return isCompeled
+        let result = dataProvider.checkRecordExist(with: id, at: currentDate)
+        return result
     }
 }
 
 extension TrackersVC: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categoriesVisible.count
+        return dataProvider.numberOfSections()
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categoriesVisible[section].categoryTrackers.count
+        return dataProvider.numberOfItems(inSection: section)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let currentItem = categoriesVisible[indexPath.section].categoryTrackers[indexPath.row]
-        let completeDays = completedTrackers.filter({ $0.recordID == currentItem.trackerID }).count
+        let tracker = dataProvider.object(at: indexPath)
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
         cell?.delegate = self
-        cell?.dataModel = currentItem
+        cell?.dataModel = tracker
         cell?.currentDate = currentDate
         cell?.indexPath = indexPath
-        cell?.completeDays = completeDays
-        cell?.isComplete = isTrackerCompleteCurrentDate(id: currentItem.trackerID)
+        cell?.completeDays = dataProvider.getCompleteDays(for: tracker.trackerID)
+        cell?.isComplete = isTrackerCompleteCurrentDate(id: tracker.trackerID)
         return cell ?? UICollectionViewCell()
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as? TrackerHeader
-        header?.headerText = categoriesVisible[indexPath.section].categoryTitle
+        header?.headerText = dataProvider.category(for: indexPath.section)
         return header ?? UICollectionReusableView()
     }
 }
@@ -239,19 +230,14 @@ extension TrackersVC: UICollectionViewDelegateFlowLayout {
 }
 
 extension TrackersVC: TrackerSpecsDelegate {
-    func didReceiveCategoriesList(newList: [String]) {
-        let newUniqueElements = newList.filter({ !allPossibleCategories.contains($0) })
-        allPossibleCategories.append(contentsOf: newUniqueElements)
-    }
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
-        if let index = categories.firstIndex(where: {$0.categoryTitle == newTrackerCategory.categoryTitle}) {
-            let mergeTrackerArray = categories[index].categoryTrackers + newTrackerCategory.categoryTrackers
-            let mergeCategory = TrackerCategory(categoryTitle: newTrackerCategory.categoryTitle, categoryTrackers: mergeTrackerArray)
-            categories[index] = mergeCategory
+        if dataProvider.fetchTrackerCategory(by: newTrackerCategory.categoryTitle) != nil {
+            dataProvider.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
         }
         else {
-            categories.append(newTrackerCategory)
+            dataProvider.createTrackerCategory(categoryTitle: newTrackerCategory.categoryTitle)
+            dataProvider.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
         }
         filterDateChange()
     }
@@ -259,12 +245,17 @@ extension TrackersVC: TrackerSpecsDelegate {
 
 extension TrackersVC: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.append(TrackerRecord(recordID: id, dateComplete: currentDate))
+        dataProvider.createRecord(with: id, for: currentDate)
         trackerCollection.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.removeAll(where: { $0.recordID == id && $0.dateComplete == currentDate})
+        do {
+            try dataProvider.deleteRecord(with: id, for: currentDate)
+        }
+        catch {
+            print("Ошибка при удалении элемента")
+        }
         trackerCollection.reloadItems(at: [indexPath])
     }
 }

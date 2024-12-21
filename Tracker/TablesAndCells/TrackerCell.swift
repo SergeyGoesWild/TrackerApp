@@ -136,10 +136,11 @@ final class TrackerCell: UICollectionViewCell {
     @objc private func addDayPressed() {
         guard let isComplete = isComplete else { return }
         guard let indexPath = indexPath else { return }
+        guard let dataModel = dataModel else { return }
         if isComplete {
-            delegate?.uncompleteTracker(id: dataModel!.trackerID, at: indexPath)
+            delegate?.uncompleteTracker(id: dataModel.trackerID, at: indexPath)
         } else {
-            delegate?.completeTracker(id: dataModel!.trackerID, at: indexPath)
+            delegate?.completeTracker(id: dataModel.trackerID, at: indexPath)
         }
     }
     
