@@ -65,7 +65,6 @@ final class TrackersVC: UIViewController {
         } else {
             displayEmptyScreen(isActive: true)
         }
-        dataProvider.trackerCategoryStore.printAllCategories()
     }
     
     private func getCurrentDayOfWeek(date: Date) -> String {
@@ -189,9 +188,7 @@ extension TrackersVC: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let categoryCD = dataProvider.category(at: IndexPath(row: 0, section: indexPath.section))
-        let trackers = Array(categoryCD.trackers as? Set<TrackerCoreData> ?? []).sorted { $0.trackerName ?? "" < $1.trackerName ?? "" }
-        let tracker = dataProvider.trackerStore.convertToTracker(trackers[indexPath.row])
+        let tracker = dataProvider.object(at: indexPath)
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
         cell?.delegate = self
         cell?.dataModel = tracker
@@ -204,8 +201,7 @@ extension TrackersVC: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as? TrackerHeader
-        let currentItemCD = dataProvider.category(at: indexPath)
-        header?.headerText = dataProvider.trackerCategoryStore.convertToCategory([currentItemCD])[0].categoryTitle
+        header?.headerText = dataProvider.category(for: indexPath.section)
         return header ?? UICollectionReusableView()
     }
 }

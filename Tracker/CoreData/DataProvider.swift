@@ -11,7 +11,7 @@ import CoreData
 
 final class DataProvider: NSObject {
     private let context: NSManagedObjectContext
-    private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>!
+    private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>!
     let trackerStore: TrackerStore
     let trackerCategoryStore: TrackerCategoryStore
     let trackerRecordStore: TrackerRecordStore
@@ -29,13 +29,16 @@ final class DataProvider: NSObject {
     }
 
     private func setupFetchedResultsController() {
-        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "categoryTitle", ascending: true)]
-        
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "category.categoryTitle", ascending: true),
+            NSSortDescriptor(key: "trackerName", ascending: true)
+        ]
+
         fetchedResultsController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
             managedObjectContext: context,
-            sectionNameKeyPath: "categoryTitle",
+            sectionNameKeyPath: "category.categoryTitle",
             cacheName: nil
         )
         fetchedResultsController.delegate = self
@@ -51,26 +54,14 @@ final class DataProvider: NSObject {
     }
     
     func performFetchByDay(for dayOfWeek: String) {
-        print("START")
         fetchedResultsController.fetchRequest.predicate = NSPredicate(
-            format: "SUBQUERY(trackers, $tracker, ANY $tracker.schedule.value == %@).@count > 0", dayOfWeek
+            format: "ANY schedule.value == %@", dayOfWeek
         )
         do {
             try fetchedResultsController.performFetch()
-            
-            if let fetchedObjects = fetchedResultsController.fetchedObjects {
-                fetchedObjects.forEach { element in
-                    print("vvvvvvvv")
-                    print(trackerCategoryStore.convertToCategory([element]))
-                    print("^^^^^^^")
-                }
-            } else {
-                print("No objects fetched.")
-            }
         } catch {
             print("Failed to update fetch request: \(error)")
         }
-        print("END")
     }
     
     func numberOfSections() -> Int {
@@ -78,20 +69,22 @@ final class DataProvider: NSObject {
     }
 
     func numberOfItems(inSection section: Int) -> Int {
-        let category = fetchedResultsController.sections?[section]
-        guard let objects = category?.objects as? [TrackerCategoryCoreData], let categoryObject = objects.first else {
-            return 0
-        }
-        return categoryObject.trackers?.count ?? 0
+        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
 
-    func category(at indexPath: IndexPath) -> TrackerCategoryCoreData {
-        return fetchedResultsController.object(at: indexPath)
+    func category(for sectionIndex: Int) -> String? {
+        guard let sections = fetchedResultsController.sections,
+              sectionIndex < sections.count else {
+            return nil
+        }
+        let firstObject = fetchedResultsController.object(at: IndexPath(row: 0, section: sectionIndex))
+        guard let category = firstObject.category else { return nil }
+        return category.categoryTitle
     }
     
-//    func object(at indexPath: IndexPath) -> TrackerCoreData {
-//        return fetchedResultsController.object(at: indexPath).trackers[indexPath]
-//    }
+    func object(at indexPath: IndexPath) -> Tracker {
+        return trackerStore.convertToTracker(fetchedResultsController.object(at: indexPath))
+    }
     
     func purgeAllData() {
         trackerCategoryStore.purgeTrackerCategories()
@@ -163,9 +156,7 @@ extension DataProvider: NSFetchedResultsControllerDelegate {
         guard let trackerCollection else { return }
         switch type {
         case .insert:
-            if let newIndexPath = newIndexPath {
-                trackerCollection.insertSections(indexSet)
-            }
+            trackerCollection.insertSections(indexSet)
            
         case .delete:
             if let indexPath = indexPath {
