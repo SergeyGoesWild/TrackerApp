@@ -13,43 +13,9 @@ final class TrackerCategoryStore {
     var trackerStore: TrackerStore
     var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>!
     
-    convenience init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        try! self.init(context: context, trackerStore: TrackerStore(context: context))
-    }
-    
-    init(context: NSManagedObjectContext, trackerStore: TrackerStore) throws {
-        self.context = context
+    init(trackerStore: TrackerStore) {
+        self.context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         self.trackerStore = trackerStore
-        setupFetchedResultsController()
-    }
-    
-    func setupFetchedResultsController() {
-        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "categoryTitle", ascending: true)]
-        fetchedResultsController = NSFetchedResultsController(
-            fetchRequest: fetchRequest,
-            managedObjectContext: context,
-            sectionNameKeyPath: "categoryTitle",
-            cacheName: nil
-        )
-        do {
-            try fetchedResultsController.performFetch()
-            print("Fetched \(fetchedResultsController.fetchedObjects?.count ?? 0) objects.")
-        } catch {
-            print("Failed to fetch data: \(error)")
-        }
-    }
-    
-    func fetchCategoriesByDay(for dayOfWeek: String) {
-        fetchedResultsController.fetchRequest.predicate = NSPredicate(
-            format: "SUBQUERY(trackers, $tracker, ANY $tracker.schedule.value == %@).@count > 0", dayOfWeek
-        )
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            print("Failed to update fetch request: \(error)")
-        }
     }
     
     func createTrackerCategory(categoryTitle: String) {
@@ -115,7 +81,8 @@ final class TrackerCategoryStore {
     func convertToCategory(_ trackerCategoryCD: [TrackerCategoryCoreData]) -> [TrackerCategory] {
         var convertedCategory: [TrackerCategory] = []
         trackerCategoryCD.forEach { trackerCategory in
-            let convertedTrackers = Array(trackerCategory.trackers as! Set<TrackerCoreData>).map { trackerCoreData in
+            guard let trackersSet = trackerCategory.trackers as? Set<TrackerCoreData> else { return }
+            let convertedTrackers = trackersSet.map { trackerCoreData in
                 return trackerStore.convertToTracker(trackerCoreData)
             }
             let newCategory = TrackerCategory(categoryTitle: trackerCategory.categoryTitle ?? "default", categoryTrackers: convertedTrackers)

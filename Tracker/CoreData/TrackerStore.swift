@@ -53,13 +53,22 @@ final class TrackerStore {
     }
     
     func convertToTracker(_ trackerCD: TrackerCoreData) -> Tracker {
-        let newSchedule = Array(trackerCD.schedule as! Set<ScheduleUnit>).compactMap({ $0.value })
-        let newTracker = Tracker(trackerID: trackerCD.trackerID ?? UUID(),
-                                 trackerName: trackerCD.trackerName ?? "default",
-                                 color: uiColorMarshalling.color(from: trackerCD.color ?? "#FFFFF"),
-                                 emoji: trackerCD.emoji ?? "x",
-                                 schedule: newSchedule)
-        return newTracker
+        if let scheduleSet = trackerCD.schedule as? Set<ScheduleUnit> {
+            let newSchedule = scheduleSet.compactMap { $0.value }
+            let newTracker = Tracker(trackerID: trackerCD.trackerID ?? UUID(),
+                                     trackerName: trackerCD.trackerName ?? "default",
+                                     color: uiColorMarshalling.color(from: trackerCD.color ?? "#FFFFF"),
+                                     emoji: trackerCD.emoji ?? "x",
+                                     schedule: newSchedule)
+            return newTracker
+        } else {
+            let newTracker = Tracker(trackerID: trackerCD.trackerID ?? UUID(),
+                                     trackerName: trackerCD.trackerName ?? "default",
+                                     color: uiColorMarshalling.color(from: trackerCD.color ?? "#FFFFF"),
+                                     emoji: trackerCD.emoji ?? "x",
+                                     schedule: [])
+            return newTracker
+        }
     }
     
     func purgeTrackers() {

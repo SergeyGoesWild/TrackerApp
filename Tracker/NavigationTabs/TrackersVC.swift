@@ -7,8 +7,6 @@
 
 import Foundation
 import UIKit
-import CoreData
-// Комментарий для ревьюера. здесь я все же импортировал CoreData, так как пользуюсь здесь методами fetchedResultsController. до его имплементации я мог обойтись без данного импорта, а после имплементации уже не знаю как обойтись без данного импорта.
 
 protocol TrackerSpecsDelegate: AnyObject {
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory)
@@ -16,7 +14,6 @@ protocol TrackerSpecsDelegate: AnyObject {
 
 final class TrackersVC: UIViewController {
     
-    var categoriesVisible: [TrackerCategory] = []
     var defaultCategory: [String] = ["Важные дела"]
     var currentDate: Date!
     
@@ -27,29 +24,21 @@ final class TrackersVC: UIViewController {
     var datePicker: UIDatePicker!
     var searchBar: UISearchBar!
     var trackerCollection: UICollectionView!
-    
-    let trackerCategoryStore = TrackerCategoryStore()
-    let trackerRecordStore = TrackerRecordStore()
+    var dataProvider: DataProvider!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        purgeAllData()
-        trackerCategoryStore.fetchedResultsController.delegate = self
         setupTrackerScreen()
+        dataProvider = DataProvider(trackerCollection: trackerCollection)
+        dataProvider.purgeAllData()
         dateDidChange()
-    }
-    
-    private func purgeAllData() {
-        trackerCategoryStore.purgeTrackerCategories()
-        trackerCategoryStore.trackerStore.purgeTrackers()
-        trackerRecordStore.purgeTrackerRecords()
     }
     
     @objc
     private func plusButtonPressed() {
         let modalVC = NewTrackerTypeVC()
         modalVC.delegateLink = self
-        let allPossibleTitles = trackerCategoryStore.getAllPossibleTitles()
+        let allPossibleTitles = dataProvider.getAllPossibleTitles()
         if allPossibleTitles.contains(where: {$0 == defaultCategory[0]}) {
             modalVC.delegateListShare = allPossibleTitles
         } else {
@@ -68,14 +57,15 @@ final class TrackersVC: UIViewController {
     
     private func filterDateChange() {
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
-        trackerCategoryStore.fetchCategoriesByDay(for: currentDayOfWeek)
+        dataProvider.performFetchByDay(for: currentDayOfWeek)
         
-        if let objects = trackerCategoryStore.fetchedResultsController.fetchedObjects, objects.isEmpty == false {
+        if dataProvider.numberOfSections() > 0 {
             displayEmptyScreen(isActive: false)
             trackerCollection.reloadData()
         } else {
             displayEmptyScreen(isActive: true)
         }
+        dataProvider.trackerCategoryStore.printAllCategories()
     }
     
     private func getCurrentDayOfWeek(date: Date) -> String {
@@ -184,42 +174,38 @@ final class TrackersVC: UIViewController {
     }
     
     private func isTrackerCompleteCurrentDate(id: UUID) -> Bool {
-        let result = trackerRecordStore.checkIfRecordExist(id, currentDate)
+        let result = dataProvider.checkRecordExist(with: id, at: currentDate)
         return result
     }
 }
 
 extension TrackersVC: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return trackerCategoryStore.fetchedResultsController.sections?.count ?? 0
+        return dataProvider.numberOfSections()
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let category = trackerCategoryStore.fetchedResultsController.sections?[section]
-        guard let objects = category?.objects as? [TrackerCategoryCoreData], let categoryObject = objects.first else {
-            return 0
-        }
-        return categoryObject.trackers?.count ?? 0
+        return dataProvider.numberOfItems(inSection: section)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let categoryCD = trackerCategoryStore.fetchedResultsController.object(at: IndexPath(row: 0, section: indexPath.section))
+        let categoryCD = dataProvider.category(at: IndexPath(row: 0, section: indexPath.section))
         let trackers = Array(categoryCD.trackers as? Set<TrackerCoreData> ?? []).sorted { $0.trackerName ?? "" < $1.trackerName ?? "" }
-        let tracker = trackerCategoryStore.trackerStore.convertToTracker(trackers[indexPath.row])
+        let tracker = dataProvider.trackerStore.convertToTracker(trackers[indexPath.row])
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
         cell?.delegate = self
         cell?.dataModel = tracker
         cell?.currentDate = currentDate
         cell?.indexPath = indexPath
-        cell?.completeDays = trackerRecordStore.getCompleteDays(tracker.trackerID)
+        cell?.completeDays = dataProvider.getCompleteDays(for: tracker.trackerID)
         cell?.isComplete = isTrackerCompleteCurrentDate(id: tracker.trackerID)
         return cell ?? UICollectionViewCell()
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as? TrackerHeader
-        let currentItemCD = trackerCategoryStore.fetchedResultsController.object(at: indexPath)
-        header?.headerText = trackerCategoryStore.convertToCategory([currentItemCD])[0].categoryTitle
+        let currentItemCD = dataProvider.category(at: indexPath)
+        header?.headerText = dataProvider.trackerCategoryStore.convertToCategory([currentItemCD])[0].categoryTitle
         return header ?? UICollectionReusableView()
     }
 }
@@ -250,12 +236,12 @@ extension TrackersVC: UICollectionViewDelegateFlowLayout {
 extension TrackersVC: TrackerSpecsDelegate {
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
-        if trackerCategoryStore.fetchTrackerCategory(by: newTrackerCategory.categoryTitle) != nil {
-            trackerCategoryStore.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
+        if dataProvider.fetchTrackerCategory(by: newTrackerCategory.categoryTitle) != nil {
+            dataProvider.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
         }
         else {
-            trackerCategoryStore.createTrackerCategory(categoryTitle: newTrackerCategory.categoryTitle)
-            trackerCategoryStore.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
+            dataProvider.createTrackerCategory(categoryTitle: newTrackerCategory.categoryTitle)
+            dataProvider.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
         }
         filterDateChange()
     }
@@ -263,51 +249,17 @@ extension TrackersVC: TrackerSpecsDelegate {
 
 extension TrackersVC: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
-        trackerRecordStore.createRecord(id, currentDate)
-        trackerRecordStore.printAllRecords()
+        dataProvider.createRecord(with: id, for: currentDate)
         trackerCollection.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
         do {
-            try trackerRecordStore.deleteRecord(withID: id, on: currentDate)
-            trackerRecordStore.printAllRecords()
+            try dataProvider.deleteRecord(with: id, for: currentDate)
         }
         catch {
             print("Ошибка при удалении элемента")
         }
         trackerCollection.reloadItems(at: [indexPath])
-    }
-}
-
-extension TrackersVC: NSFetchedResultsControllerDelegate {
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange anObject: Any,
-                    at indexPath: IndexPath?,
-                    atSectionIndex sectionIndex: Int,
-                    for type: NSFetchedResultsChangeType,
-                    newIndexPath: IndexPath?) {
-        let indexSet = IndexSet(integer: sectionIndex)
-        switch type {
-        case .insert:
-            if let newIndexPath = newIndexPath {
-                trackerCollection.insertSections(indexSet)
-            }
-           
-        case .delete:
-            if let indexPath = indexPath {
-                trackerCollection.deleteItems(at: [indexPath])
-            }
-        case .update:
-            if let indexPath = indexPath {
-                trackerCollection.reloadItems(at: [indexPath])
-            }
-        case .move:
-            if let indexPath = indexPath, let newIndexPath = newIndexPath {
-                trackerCollection.moveItem(at: indexPath, to: newIndexPath)
-            }
-        @unknown default:
-            fatalError("Unknown change type in NSFetchedResultsControllerDelegate.")
-        }
     }
 }
