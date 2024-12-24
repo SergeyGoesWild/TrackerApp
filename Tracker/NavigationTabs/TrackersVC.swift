@@ -24,12 +24,11 @@ final class TrackersVC: UIViewController {
     var datePicker: UIDatePicker!
     var searchBar: UISearchBar!
     var trackerCollection: UICollectionView!
-    var dataProvider: DataProvider!
+    let trackerVM = TrackersVM()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTrackerScreen()
-        dataProvider = DataProvider(trackerCollection: trackerCollection)
         //        dataProvider.purgeAllData()
         dateDidChange()
     }
@@ -57,13 +56,12 @@ final class TrackersVC: UIViewController {
     
     private func filterDateChange() {
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
-        dataProvider.performFetchByDay(for: currentDayOfWeek)
-        
-        if dataProvider.numberOfSections() > 0 {
+        trackerVM.fetchByDay(dayOfWeek: currentDayOfWeek)
+        if trackerVM.categoriesVisible.isEmpty {
+            displayEmptyScreen(isActive: true)
+        } else {
             displayEmptyScreen(isActive: false)
             trackerCollection.reloadData()
-        } else {
-            displayEmptyScreen(isActive: true)
         }
     }
     
@@ -180,11 +178,11 @@ final class TrackersVC: UIViewController {
 
 extension TrackersVC: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return dataProvider.numberOfSections()
+        return trackerVM.categoriesVisible.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dataProvider.numberOfItems(inSection: section)
+        return trackerVM.categoriesVisible[section].categoryTrackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

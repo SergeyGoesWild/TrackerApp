@@ -15,15 +15,20 @@ final class DataProvider: NSObject {
     let trackerStore: TrackerStore
     let trackerCategoryStore: TrackerCategoryStore
     let trackerRecordStore: TrackerRecordStore
-    private weak var trackerCollection: UICollectionView?
     var onContentChanged: (() -> Void)?
+    var results: [TrackerCoreData] {
+        guard let objects = fetchedResultsController.fetchedObjects else {
+            print("Результат FETCH это NIL")
+            return []
+        }
+        return objects
+    }
     
-    init(trackerCollection: UICollectionView) {
+    override init() {
         self.context = ContextProvider.shared.context
         self.trackerStore = TrackerStore()
         self.trackerCategoryStore = TrackerCategoryStore(trackerStore: self.trackerStore)
         self.trackerRecordStore = TrackerRecordStore()
-        self.trackerCollection = trackerCollection
         super.init()
         setupFetchedResultsController()
     }
