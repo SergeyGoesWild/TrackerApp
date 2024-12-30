@@ -132,7 +132,7 @@ final class DataProvider: NSObject {
         trackerRecordStore.createRecord(id, date)
     }
     
-    func deleteRecord(with id: UUID, for date: Date) throws {
+    func deleteRecord(with id: UUID, for date: Date) {
         do {
             try trackerRecordStore.deleteRecord(withID: id, on: date)
         }
