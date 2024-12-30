@@ -151,32 +151,32 @@ final class DataProvider: NSObject {
 }
 
 extension DataProvider: NSFetchedResultsControllerDelegate {
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange anObject: Any,
-                    at indexPath: IndexPath?,
-                    atSectionIndex sectionIndex: Int,
-                    for type: NSFetchedResultsChangeType,
-                    newIndexPath: IndexPath?) {
-        let indexSet = IndexSet(integer: sectionIndex)
-        guard let trackerCollection else { return }
-        switch type {
-        case .insert:
-            trackerCollection.insertSections(indexSet)
-            
-        case .delete:
-            if let indexPath = indexPath {
-                trackerCollection.deleteItems(at: [indexPath])
-            }
-        case .update:
-            if let indexPath = indexPath {
-                trackerCollection.reloadItems(at: [indexPath])
-            }
-        case .move:
-            if let indexPath = indexPath, let newIndexPath = newIndexPath {
-                trackerCollection.moveItem(at: indexPath, to: newIndexPath)
-            }
-        @unknown default:
-            fatalError("Unknown change type in NSFetchedResultsControllerDelegate.")
-        }
-    }
+//    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+//                    didChange anObject: Any,
+//                    at indexPath: IndexPath?,
+//                    atSectionIndex sectionIndex: Int,
+//                    for type: NSFetchedResultsChangeType,
+//                    newIndexPath: IndexPath?) {
+//        let indexSet = IndexSet(integer: sectionIndex)
+//        guard let trackerCollection else { return }
+//        switch type {
+//        case .insert:
+//            trackerCollection.insertSections(indexSet)
+//            
+//        case .delete:
+//            if let indexPath = indexPath {
+//                trackerCollection.deleteItems(at: [indexPath])
+//            }
+//        case .update:
+//            if let indexPath = indexPath {
+//                trackerCollection.reloadItems(at: [indexPath])
+//            }
+//        case .move:
+//            if let indexPath = indexPath, let newIndexPath = newIndexPath {
+//                trackerCollection.moveItem(at: indexPath, to: newIndexPath)
+//            }
+//        @unknown default:
+//            fatalError("Unknown change type in NSFetchedResultsControllerDelegate.")
+//        }
+//    }
 }

@@ -44,6 +44,7 @@ final class TrackersVC: UIViewController {
         let modalVC = NewTrackerTypeVC()
         modalVC.delegateLink = self
         let allPossibleTitles = trackerVM.getAllPossibleTitles()
+        modalVC.delegateListShare = allPossibleTitles
         let navController = UINavigationController(rootViewController: modalVC)
         present(navController, animated: true)
     }

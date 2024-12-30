@@ -29,7 +29,7 @@ class TrackersVM {
     }
     
     func getAllPossibleTitles() -> [String] {
-        var allPossibleTitles = dataProvider.getAllPossibleTitles()
+        let allPossibleTitles = dataProvider.getAllPossibleTitles()
         if allPossibleTitles.contains(where: {$0 == defaultCategory[0]}) {
             return allPossibleTitles
         } else {
