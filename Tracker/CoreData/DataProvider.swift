@@ -15,15 +15,20 @@ final class DataProvider: NSObject {
     let trackerStore: TrackerStore
     let trackerCategoryStore: TrackerCategoryStore
     let trackerRecordStore: TrackerRecordStore
-    private weak var trackerCollection: UICollectionView?
     var onContentChanged: (() -> Void)?
+    var results: [TrackerCoreData] {
+        guard let objects = fetchedResultsController.fetchedObjects else {
+            print("Результат FETCH это NIL")
+            return []
+        }
+        return objects
+    }
     
-    init(trackerCollection: UICollectionView) {
+    override init() {
         self.context = ContextProvider.shared.context
         self.trackerStore = TrackerStore()
         self.trackerCategoryStore = TrackerCategoryStore(trackerStore: self.trackerStore)
         self.trackerRecordStore = TrackerRecordStore()
-        self.trackerCollection = trackerCollection
         super.init()
         setupFetchedResultsController()
     }
@@ -59,6 +64,8 @@ final class DataProvider: NSObject {
         )
         do {
             try fetchedResultsController.performFetch()
+            onContentChanged?()
+            print("trying")
         } catch {
             print("Failed to update fetch request: \(error)")
         }
@@ -127,7 +134,7 @@ final class DataProvider: NSObject {
         trackerRecordStore.createRecord(id, date)
     }
     
-    func deleteRecord(with id: UUID, for date: Date) throws {
+    func deleteRecord(with id: UUID, for date: Date) {
         do {
             try trackerRecordStore.deleteRecord(withID: id, on: date)
         }
@@ -146,32 +153,32 @@ final class DataProvider: NSObject {
 }
 
 extension DataProvider: NSFetchedResultsControllerDelegate {
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange anObject: Any,
-                    at indexPath: IndexPath?,
-                    atSectionIndex sectionIndex: Int,
-                    for type: NSFetchedResultsChangeType,
-                    newIndexPath: IndexPath?) {
-        let indexSet = IndexSet(integer: sectionIndex)
-        guard let trackerCollection else { return }
-        switch type {
-        case .insert:
-            trackerCollection.insertSections(indexSet)
-            
-        case .delete:
-            if let indexPath = indexPath {
-                trackerCollection.deleteItems(at: [indexPath])
-            }
-        case .update:
-            if let indexPath = indexPath {
-                trackerCollection.reloadItems(at: [indexPath])
-            }
-        case .move:
-            if let indexPath = indexPath, let newIndexPath = newIndexPath {
-                trackerCollection.moveItem(at: indexPath, to: newIndexPath)
-            }
-        @unknown default:
-            fatalError("Unknown change type in NSFetchedResultsControllerDelegate.")
-        }
-    }
+//    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+//                    didChange anObject: Any,
+//                    at indexPath: IndexPath?,
+//                    atSectionIndex sectionIndex: Int,
+//                    for type: NSFetchedResultsChangeType,
+//                    newIndexPath: IndexPath?) {
+//        let indexSet = IndexSet(integer: sectionIndex)
+//        guard let trackerCollection else { return }
+//        switch type {
+//        case .insert:
+//            trackerCollection.insertSections(indexSet)
+//            
+//        case .delete:
+//            if let indexPath = indexPath {
+//                trackerCollection.deleteItems(at: [indexPath])
+//            }
+//        case .update:
+//            if let indexPath = indexPath {
+//                trackerCollection.reloadItems(at: [indexPath])
+//            }
+//        case .move:
+//            if let indexPath = indexPath, let newIndexPath = newIndexPath {
+//                trackerCollection.moveItem(at: indexPath, to: newIndexPath)
+//            }
+//        @unknown default:
+//            fatalError("Unknown change type in NSFetchedResultsControllerDelegate.")
+//        }
+//    }
 }

@@ -14,7 +14,6 @@ protocol TrackerSpecsDelegate: AnyObject {
 
 final class TrackersVC: UIViewController {
     
-    var defaultCategory: [String] = ["Важные дела"]
     var currentDate: Date!
     
     var starImage: UIImageView!
@@ -24,26 +23,29 @@ final class TrackersVC: UIViewController {
     var datePicker: UIDatePicker!
     var searchBar: UISearchBar!
     var trackerCollection: UICollectionView!
-    var dataProvider: DataProvider!
+    let trackerVM = TrackersVM()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTrackerScreen()
-        dataProvider = DataProvider(trackerCollection: trackerCollection)
+        setupBindings()
         //        dataProvider.purgeAllData()
         dateDidChange()
+    }
+    
+    func setupBindings() {
+        trackerVM.onCategoriesUpdated = { [weak self] in
+            print(self?.trackerVM.categoriesVisible ?? "x")
+            self?.trackerCollection.reloadData()
+        }
     }
     
     @objc
     private func plusButtonPressed() {
         let modalVC = NewTrackerTypeVC()
         modalVC.delegateLink = self
-        let allPossibleTitles = dataProvider.getAllPossibleTitles()
-        if allPossibleTitles.contains(where: {$0 == defaultCategory[0]}) {
-            modalVC.delegateListShare = allPossibleTitles
-        } else {
-            modalVC.delegateListShare = allPossibleTitles + defaultCategory
-        }
+        let allPossibleTitles = trackerVM.getAllPossibleTitles()
+        modalVC.delegateListShare = allPossibleTitles
         let navController = UINavigationController(rootViewController: modalVC)
         present(navController, animated: true)
     }
@@ -56,14 +58,14 @@ final class TrackersVC: UIViewController {
     }
     
     private func filterDateChange() {
+        print("fetch by day")
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
-        dataProvider.performFetchByDay(for: currentDayOfWeek)
-        
-        if dataProvider.numberOfSections() > 0 {
+        trackerVM.fetchByDay(dayOfWeek: currentDayOfWeek)
+        if trackerVM.categoriesVisible.isEmpty {
+            displayEmptyScreen(isActive: true)
+        } else {
             displayEmptyScreen(isActive: false)
             trackerCollection.reloadData()
-        } else {
-            displayEmptyScreen(isActive: true)
         }
     }
     
@@ -171,37 +173,32 @@ final class TrackersVC: UIViewController {
         starTextLabel.isHidden = !isActive
         trackerCollection.isHidden = isActive
     }
-    
-    private func isTrackerCompleteCurrentDate(id: UUID) -> Bool {
-        let result = dataProvider.checkRecordExist(with: id, at: currentDate)
-        return result
-    }
 }
 
 extension TrackersVC: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return dataProvider.numberOfSections()
+        return trackerVM.categoriesVisible.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dataProvider.numberOfItems(inSection: section)
+        return trackerVM.categoriesVisible[section].categoryTrackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let tracker = dataProvider.object(at: indexPath)
+        let tracker = trackerVM.categoriesVisible[indexPath.section].categoryTrackers[indexPath.row]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "OneTracker", for: indexPath) as? TrackerCell
         cell?.delegate = self
         cell?.dataModel = tracker
         cell?.currentDate = currentDate
         cell?.indexPath = indexPath
-        cell?.completeDays = dataProvider.getCompleteDays(for: tracker.trackerID)
-        cell?.isComplete = isTrackerCompleteCurrentDate(id: tracker.trackerID)
+        cell?.completeDays = trackerVM.getCompleteDays(for: tracker.trackerID)
+        cell?.isComplete = trackerVM.isTrackerCompleteCurrentDate(id: tracker.trackerID, at: currentDate)
         return cell ?? UICollectionViewCell()
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as? TrackerHeader
-        header?.headerText = dataProvider.category(for: indexPath.section)
+        header?.headerText = trackerVM.categoriesVisible[indexPath.section].categoryTitle
         return header ?? UICollectionReusableView()
     }
 }
@@ -232,30 +229,21 @@ extension TrackersVC: UICollectionViewDelegateFlowLayout {
 extension TrackersVC: TrackerSpecsDelegate {
     
     func didReceiveNewTracker(newTrackerCategory: TrackerCategory) {
-        if dataProvider.fetchTrackerCategory(by: newTrackerCategory.categoryTitle) != nil {
-            dataProvider.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
-        }
-        else {
-            dataProvider.createTrackerCategory(categoryTitle: newTrackerCategory.categoryTitle)
-            dataProvider.updateTrackerCategory(title: newTrackerCategory.categoryTitle, newTracker: newTrackerCategory.categoryTrackers[0])
-        }
+        trackerVM.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
         filterDateChange()
     }
 }
 
 extension TrackersVC: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
-        dataProvider.createRecord(with: id, for: currentDate)
+        // может быть ошибка с indexPath я его в итоге не передаю
+        trackerVM.completeTracker(id: id, date: currentDate)
         trackerCollection.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        do {
-            try dataProvider.deleteRecord(with: id, for: currentDate)
-        }
-        catch {
-            print("Ошибка при удалении элемента")
-        }
+        // может быть ошибка с indexPath я его в итоге не передаю
+        trackerVM.uncompleteTracker(id: id, date: currentDate)
         trackerCollection.reloadItems(at: [indexPath])
     }
 }
