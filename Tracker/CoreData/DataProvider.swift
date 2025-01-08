@@ -64,6 +64,8 @@ final class DataProvider: NSObject {
         )
         do {
             try fetchedResultsController.performFetch()
+            onContentChanged?()
+            print("trying")
         } catch {
             print("Failed to update fetch request: \(error)")
         }

@@ -13,9 +13,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
         window = UIWindow()
-        window?.rootViewController = OnboardingScreen()
-//        window?.rootViewController = RootViewController()
+        if UserDefaults.standard.bool(forKey: "onBoardingDone") == true {
+            window?.rootViewController = RootViewController()
+        } else {
+            window?.rootViewController = OnboardingScreen()
+        }
         window?.makeKeyAndVisible()
         return true
     }

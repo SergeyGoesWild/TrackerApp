@@ -35,6 +35,7 @@ final class TrackersVC: UIViewController {
     
     func setupBindings() {
         trackerVM.onCategoriesUpdated = { [weak self] in
+            print(self?.trackerVM.categoriesVisible ?? "x")
             self?.trackerCollection.reloadData()
         }
     }
@@ -57,6 +58,7 @@ final class TrackersVC: UIViewController {
     }
     
     private func filterDateChange() {
+        print("fetch by day")
         let currentDayOfWeek = getCurrentDayOfWeek(date: currentDate)
         trackerVM.fetchByDay(dayOfWeek: currentDayOfWeek)
         if trackerVM.categoriesVisible.isEmpty {

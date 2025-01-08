@@ -21,8 +21,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         guard let window = window else { return }
-        window.rootViewController = OnboardingScreen()
-//        window.rootViewController = RootViewController()
+        if UserDefaults.standard.bool(forKey: "onBoardingDone") == true {
+            window.rootViewController = RootViewController()
+        } else {
+            window.rootViewController = OnboardingScreen()
+        }
         window.makeKeyAndVisible()
     }
 

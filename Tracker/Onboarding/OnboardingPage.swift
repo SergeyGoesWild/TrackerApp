@@ -73,6 +73,7 @@ final class OnboardingPage: UIViewController {
     }
     
     @objc private func closeButtonPressed() {
+        UserDefaults.standard.set(true, forKey: "onBoardingDone")
         let nextViewController = RootViewController()
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let keyWindow = windowScene.windows.first {

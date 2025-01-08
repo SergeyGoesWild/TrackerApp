@@ -8,11 +8,7 @@
 import Foundation
 
 class TrackersVM {
-    private(set) var categoriesVisible: [TrackerCategory] = [] {
-        didSet {
-            onCategoriesUpdated?()
-        }
-    }
+    private(set) var categoriesVisible: [TrackerCategory] = []
     
     var defaultCategory: [String] = ["Важные дела"]
     var onCategoriesUpdated: (() -> Void)?
@@ -21,11 +17,16 @@ class TrackersVM {
     
     init() {
         dataProvider = DataProvider()
+        dataProvider.onContentChanged = { [weak self] in
+            print("DID CHANGE")
+            self?.fetchCategories() // Automatically refresh categories when data changes
+            self?.onCategoriesUpdated?() // Notify ViewController
+        }
     }
     
     func fetchByDay(dayOfWeek: String) {
+        print("performing")
         dataProvider.performFetchByDay(for: dayOfWeek)
-        fetchCategories()
     }
     
     func getAllPossibleTitles() -> [String] {
@@ -70,7 +71,7 @@ class TrackersVM {
     private func fetchCategories() {
         let grouped = Dictionary(grouping: dataProvider.results) { $0.category?.categoryTitle ?? "Unknown Category" }
         
-        categoriesVisible = grouped.map { categoryName, trackers in
+        categoriesVisible = grouped.sorted { $0.key < $1.key }.map { categoryName, trackers in
             TrackerCategory(
                 categoryTitle: categoryName,
                 categoryTrackers: trackers.map { tracker in
