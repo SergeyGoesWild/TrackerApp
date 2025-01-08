@@ -136,10 +136,11 @@ final class NewTrackerSpecsVC: UIViewController {
     }
     
     private func formNewTracker(chosenCategory: String, chosenTitle: String, chosenColor: UIColor, chosenEmoji: String, chosenSchedule: [dayOfWeek]?) {
+        
         let newTracker = Tracker(trackerID: UUID(), trackerName: chosenTitle, color: chosenColor, emoji: chosenEmoji, schedule: chosenSchedule?.map( {$0.engName} ))
+        
         let newTrackerCategory = TrackerCategory(categoryTitle: chosenCategory, categoryTrackers: [newTracker])
         delegate?.didReceiveNewTracker(newTrackerCategory: newTrackerCategory)
-        delegate?.didReceiveCategoriesList(newList: possibleCategories)
         dismiss(animated: true, completion: nil)
     }
     
@@ -333,7 +334,7 @@ extension NewTrackerSpecsVC: UICollectionViewDelegate {
                     previousChosenColorCell.layer.borderWidth = 0
                 }
                 chosenColor = cell.colorView.backgroundColor
-                cell.layer.borderColor = UIColor(red: 0.20, green: 0.81, blue: 0.41, alpha: 0.30).cgColor
+                cell.layer.borderColor = chosenColor?.cgColor
                 cell.layer.borderWidth = 3
                 cell.layer.cornerRadius = 8
                 previousChosenColorCell = cell
